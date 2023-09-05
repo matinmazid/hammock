@@ -13,14 +13,28 @@ struct guiWindow
 
 /**************** FUNCTIONS *****************/
 
-WINDOW *drawRightWindow(void)
+WINDOW *drawLeftWindow(WINDOW * windowPtr)
 {
 
-	WINDOW *windowsPtr = newwin(LINES, COLS / 2, 0, 0);
-	printw("hell world %d %d", (COLS / 2), (COLS / 2));
+	if (windowPtr!=NULL)
+		destroy_win(windowPtr);
+	printw("%d %d",LINES,COLS);
+	WINDOW *windowsPtr = newwin(LINES, COLS / 2,0 ,COLS/2 );
 	box(windowsPtr, 0, 0);
 	wrefresh(windowsPtr);
+	
+	return windowsPtr;
+}
+WINDOW *drawRightWindow(WINDOW * windowPtr)
+{
 
+	if (windowPtr!=NULL)
+		destroy_win(windowPtr);
+	printw("right window %d %d",LINES,COLS);
+	WINDOW *windowsPtr = newwin(LINES, COLS / 2, 0, 0);
+	box(windowsPtr, 0, 0);
+	wrefresh(windowsPtr);
+	
 	return windowsPtr;
 }
 
@@ -50,7 +64,6 @@ int main()
 {
 	int startx, starty, width, height;
 	int ch;
-	printf("hell world");
 	struct guiWindow inputBox;
 	struct guiWindow outputBox;
 	initscr();			  /* Start curses mode 		*/
@@ -58,10 +71,11 @@ int main()
 					 * everty thing to me 		*/
 	keypad(stdscr, TRUE); /* I need that nifty F1 	*/
 	refresh();
-	inputBox.widowRef = drawRightWindow();
+	inputBox.widowRef = drawRightWindow(NULL);
+	outputBox.widowRef=drawLeftWindow(NULL);
 	while ((ch = getch()) != KEY_F(1))
 	{
-		inputBox.widowRef = drawRightWindow();
+		inputBox.widowRef=inputBox.widowRef = drawRightWindow(inputBox.widowRef);
 	}
 
 	endwin(); /* End curses mode		  */
