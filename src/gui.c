@@ -13,28 +13,39 @@ struct guiWindow
 
 /**************** FUNCTIONS *****************/
 
-WINDOW *drawLeftWindow(WINDOW * windowPtr)
+WINDOW *drawRightWindow(WINDOW *windowPtr)
 {
 
-	if (windowPtr!=NULL)
+	if (windowPtr != NULL)
 		destroy_win(windowPtr);
-	printw("%d %d",LINES,COLS);
-	WINDOW *windowsPtr = newwin(LINES, COLS / 2,0 ,COLS/2 );
+	WINDOW *windowsPtr = newwin(LINES-3, (COLS / 2), 3, COLS / 2);
 	box(windowsPtr, 0, 0);
 	wrefresh(windowsPtr);
-	
+
 	return windowsPtr;
 }
-WINDOW *drawRightWindow(WINDOW * windowPtr)
+
+WINDOW *drawUrlBox(WINDOW *windowPtr)
 {
 
-	if (windowPtr!=NULL)
+	if (windowPtr != NULL)
 		destroy_win(windowPtr);
-	printw("right window %d %d",LINES,COLS);
-	WINDOW *windowsPtr = newwin(LINES, COLS / 2, 0, 0);
+	WINDOW *windowsPtr = newwin(3 ,COLS , 0, 0);
 	box(windowsPtr, 0, 0);
 	wrefresh(windowsPtr);
-	
+
+	return windowsPtr;
+}
+
+WINDOW *drawLeftWindow(WINDOW *windowPtr)
+{
+
+	if (windowPtr != NULL)
+		destroy_win(windowPtr);
+	WINDOW *windowsPtr = newwin(LINES-3, (COLS / 2), 3, 0);
+	box(windowsPtr, 0, 0);
+	wrefresh(windowsPtr);
+
 	return windowsPtr;
 }
 
@@ -64,21 +75,24 @@ int main()
 {
 	int startx, starty, width, height;
 	int ch;
-	struct guiWindow inputBox;
-	struct guiWindow outputBox;
+	struct guiWindow inputBox, outputBox, urlBox;
 	initscr();			  /* Start curses mode 		*/
 	cbreak();			  /* Line buffering disabled, Pass on
-					 * everty thing to me 		*/
+					 		* everty thing to me 		*/
 	keypad(stdscr, TRUE); /* I need that nifty F1 	*/
+	printw("Press F1 to exit");
 	refresh();
+
 	inputBox.widowRef = drawRightWindow(NULL);
-	outputBox.widowRef=drawLeftWindow(NULL);
+	outputBox.widowRef = drawLeftWindow(NULL);
+	urlBox.widowRef = drawUrlBox(NULL);
 	while ((ch = getch()) != KEY_F(1))
 	{
-		inputBox.widowRef=inputBox.widowRef = drawRightWindow(inputBox.widowRef);
+		inputBox.widowRef = drawRightWindow(inputBox.widowRef);
+		outputBox.widowRef = drawLeftWindow(outputBox.widowRef);
+		urlBox.widowRef = drawUrlBox(urlBox.widowRef);
 	}
 
 	endwin(); /* End curses mode		  */
 	return 0;
 }
-
