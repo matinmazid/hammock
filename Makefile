@@ -8,6 +8,10 @@ hammock: $(SRCDIR)gui.c
 run_new: hammock
 	./hammock
 
+
+foo: foo.c
+	gcc $(CFLAGS) foo.c  -L/usr/lib -lncurses
+
 clean:
 	rm -r hammock
 touch: 

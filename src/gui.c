@@ -6,19 +6,22 @@ void destroy_win(WINDOW *local_win);
 /**************** STRUCTS *****************/
 struct guiWindow
 {
-	int x;
-	int y;
 	WINDOW *widowRef;
 };
 
+enum WINDOWS
+{
+	URL,
+	LEFT,
+	RIGHT
+};
 /**************** FUNCTIONS *****************/
 
 WINDOW *drawRightWindow(WINDOW *windowPtr)
 {
 
-	if (windowPtr != NULL)
-		destroy_win(windowPtr);
-	WINDOW *windowsPtr = newwin(LINES-3, (COLS / 2), 3, COLS / 2);
+	destroy_win(windowPtr);
+	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, COLS / 2);
 	box(windowsPtr, 0, 0);
 	wrefresh(windowsPtr);
 
@@ -28,9 +31,8 @@ WINDOW *drawRightWindow(WINDOW *windowPtr)
 WINDOW *drawUrlBox(WINDOW *windowPtr)
 {
 
-	if (windowPtr != NULL)
-		destroy_win(windowPtr);
-	WINDOW *windowsPtr = newwin(3 ,COLS , 0, 0);
+	destroy_win(windowPtr);
+	WINDOW *windowsPtr = newwin(3, COLS, 0, 0);
 	box(windowsPtr, 0, 0);
 	wrefresh(windowsPtr);
 
@@ -40,13 +42,22 @@ WINDOW *drawUrlBox(WINDOW *windowPtr)
 WINDOW *drawLeftWindow(WINDOW *windowPtr)
 {
 
-	if (windowPtr != NULL)
-		destroy_win(windowPtr);
-	WINDOW *windowsPtr = newwin(LINES-3, (COLS / 2), 3, 0);
+	destroy_win(windowPtr);
+	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, 0);
 	box(windowsPtr, 0, 0);
 	wrefresh(windowsPtr);
 
 	return windowsPtr;
+}
+
+struct guiWindow *repaintWindows(struct guiWindow *windows)
+{
+
+	windows[RIGHT].widowRef = drawRightWindow(windows[RIGHT].widowRef);
+	windows[LEFT].widowRef = drawLeftWindow(windows[LEFT].widowRef);
+	windows[URL].widowRef = drawUrlBox(windows[URL].widowRef);
+
+	return windows;
 }
 
 void destroy_win(WINDOW *local_win)
@@ -70,12 +81,12 @@ void destroy_win(WINDOW *local_win)
 	wrefresh(local_win);
 	delwin(local_win);
 }
+
 /****************************** MAIN **********************/
 int main()
 {
-	int startx, starty, width, height;
 	int ch;
-	struct guiWindow inputBox, outputBox, urlBox;
+	struct guiWindow windows[3];
 	initscr();			  /* Start curses mode 		*/
 	cbreak();			  /* Line buffering disabled, Pass on
 					 		* everty thing to me 		*/
@@ -83,14 +94,18 @@ int main()
 	printw("Press F1 to exit");
 	refresh();
 
-	inputBox.widowRef = drawRightWindow(NULL);
-	outputBox.widowRef = drawLeftWindow(NULL);
-	urlBox.widowRef = drawUrlBox(NULL);
-	while ((ch = getch()) != KEY_F(1))
+	windows[RIGHT].widowRef = NULL;
+	windows[LEFT].widowRef = NULL;
+	windows[URL].widowRef = NULL;
+
+	windows[RIGHT].widowRef = drawRightWindow(NULL);
+	windows[LEFT].widowRef = drawLeftWindow(NULL);
+	windows[URL].widowRef = drawUrlBox(NULL);
+	while ((ch = getch()) != '\n')
 	{
-		inputBox.widowRef = drawRightWindow(inputBox.widowRef);
-		outputBox.widowRef = drawLeftWindow(outputBox.widowRef);
-		urlBox.widowRef = drawUrlBox(urlBox.widowRef);
+		windows[RIGHT].widowRef = drawRightWindow(windows[RIGHT].widowRef);
+		windows[LEFT].widowRef = drawLeftWindow(windows[LEFT].widowRef);
+		windows[URL].widowRef = drawUrlBox(windows[URL].widowRef);
 	}
 
 	endwin(); /* End curses mode		  */
