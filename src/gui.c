@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <ncurses.h>
 #include <stdlib.h>
+#include <strings.h>
+
 void destroy_win(WINDOW *local_win);
 
 /**************** STRUCTS *****************/
@@ -15,6 +17,10 @@ enum WINDOWS
 	LEFT,
 	RIGHT
 };
+
+/**************** GLOBALS *****************/
+
+struct guiWindow windows[3];
 /**************** FUNCTIONS *****************/
 
 WINDOW *drawRightWindow(WINDOW *windowPtr)
@@ -50,14 +56,14 @@ WINDOW *drawLeftWindow(WINDOW *windowPtr)
 	return windowsPtr;
 }
 
-struct guiWindow *repaintWindows(struct guiWindow *windows)
+void repaintWindows(void)
 {
 
 	windows[RIGHT].widowRef = drawRightWindow(windows[RIGHT].widowRef);
 	windows[LEFT].widowRef = drawLeftWindow(windows[LEFT].widowRef);
 	windows[URL].widowRef = drawUrlBox(windows[URL].widowRef);
 
-	return windows;
+	return;
 }
 
 void destroy_win(WINDOW *local_win)
@@ -86,7 +92,6 @@ void destroy_win(WINDOW *local_win)
 int main()
 {
 	int ch;
-	struct guiWindow windows[3];
 	initscr();			  /* Start curses mode 		*/
 	cbreak();			  /* Line buffering disabled, Pass on
 					 		* everty thing to me 		*/
@@ -98,14 +103,17 @@ int main()
 	windows[LEFT].widowRef = NULL;
 	windows[URL].widowRef = NULL;
 
-	windows[RIGHT].widowRef = drawRightWindow(NULL);
-	windows[LEFT].widowRef = drawLeftWindow(NULL);
-	windows[URL].widowRef = drawUrlBox(NULL);
-	while ((ch = getch()) != '\n')
+	repaintWindows();
+
+	char url[512];
+	bzero(url, sizeof(url));
+
+	while (TRUE)
 	{
-		windows[RIGHT].widowRef = drawRightWindow(windows[RIGHT].widowRef);
-		windows[LEFT].widowRef = drawLeftWindow(windows[LEFT].widowRef);
-		windows[URL].widowRef = drawUrlBox(windows[URL].widowRef);
+		mvwscanw(windows[URL].widowRef,1,0,"%s",url);
+		repaintWindows();
+		wprintw(windows[RIGHT].widowRef, ">>>%s<<<", url);
+		wrefresh(windows[RIGHT].widowRef);
 	}
 
 	endwin(); /* End curses mode		  */
