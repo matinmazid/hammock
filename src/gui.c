@@ -108,13 +108,14 @@ int main()
 	char url[512];
 	bzero(url, sizeof(url));
 
-	while (TRUE)
-	{
-		mvwscanw(windows[URL].widowRef,1,0,"%s",url);
+	do {
 		repaintWindows();
-		wprintw(windows[RIGHT].widowRef, ">>>%s<<<", url);
+		mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
+
+		mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", url);
 		wrefresh(windows[RIGHT].widowRef);
 	}
+	while ((ch = getch()) != '\t');
 
 	endwin(); /* End curses mode		  */
 	return 0;
