@@ -16,6 +16,7 @@ struct MemoryStruct
 static size_t
 WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
+    printf("-------------\n");
     size_t realsize = size * nmemb;
     struct MemoryStruct *mem = (struct MemoryStruct *)userp;
 
@@ -26,6 +27,7 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
         printf("not enough memory (realloc returned NULL)\n");
         return 0;
     }
+
     mem->memory = ptr;
     memcpy(&(mem->memory[mem->size]), contents, realsize);
     mem->size += realsize;
@@ -46,8 +48,7 @@ int main(char **args)
 
         chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
         chunk.size = 0;           /* no data at this point */
-        curl_easy_setopt(curl, CURLOPT_URL, "https://example.comx");
-        res = curl_easy_perform(curl);
+        curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
         /* send all data to this function  */
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
@@ -59,8 +60,8 @@ int main(char **args)
      field, so we provide one */
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
-        /* get it! */
         res = curl_easy_perform(curl);
+        /* get it! */
 
         /* check for errors */
         if (res != CURLE_OK)
@@ -77,7 +78,8 @@ int main(char **args)
      * Do something nice with it!
      */
 
-            printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
+            // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
+            printf(">>>>>> %s <<<<<< \n", (unsigned long)chunk.memory);
         }
 
         /* cleanup curl stuff */
