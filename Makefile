@@ -1,8 +1,8 @@
 CFLAGS := -g
 SRCDIR := src/
 
-hammock: $(SRCDIR)gui.c
-	gcc $(CFLAGS) $(SRCDIR)gui.c -o hammock -L/usr/lib -lncurses
+hammock: $(SRCDIR)gui.c  webClient.o
+	gcc $(CFLAGS) $(SRCDIR)gui.c -o hammock webClient.o  -L/usr/lib -lncurses  -lcurl -L/usr/lib/x86_64-linux-gnu/ 
 	chmod u+x hammock
 
 run_hammock: hammock
@@ -12,13 +12,11 @@ run_hammock: hammock
 foo: foo.c
 	gcc $(CFLAGS) foo.c  -L/usr/lib -lncurses
 
-rest: $(SRCDIR)webClient.c
-	gcc $(CFLAGS) $(SRCDIR)webClient.c -lcurl -L/usr/lib/x86_64-linux-gnu/ -o webClient
+webClient.o: $(SRCDIR)webClient.c
+	gcc $(CFLAGS) -c $(SRCDIR)webClient.c  -lcurl -L/usr/lib/x86_64-linux-gnu/ 
 
-run_rest: rest	
-	./webClient
 
 clean:
-	rm -r hammock
+	rm -r hammock webClient.o
 touch: 
 	touch $(SRCDIR)gui.c

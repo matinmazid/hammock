@@ -2,25 +2,20 @@
 // example  https://cat-fact.herokuapp.com/facts/
 
 #include <stdio.h>
-#include <curl/curl.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "gui.h"
+#include "webClient.h"
 //***
-struct MemoryStruct
-{
-    char *memory;
-    size_t size;
-};
 
 static size_t
 WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
-    printf("-------------\n");
+    windows[LEFT].widowRef;
     size_t realsize = size * nmemb;
-    struct MemoryStruct *mem = (struct MemoryStruct *)userp;
+    struct RestRequest *mem = (struct RestRequest *)userp;
 
-    char *ptr = realloc(mem->memory, mem->size + realsize + 1);
+    char *ptr = realloc(mem->responseBody, mem->size + realsize + 1);
     if (!ptr)
     {
         /* out of memory! */
@@ -28,33 +23,33 @@ WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
         return 0;
     }
 
-    mem->memory = ptr;
-    memcpy(&(mem->memory[mem->size]), contents, realsize);
+    mem->responseBody = ptr;
+    memcpy(&(mem->responseBody[mem->size]), contents, realsize);
     mem->size += realsize;
-    mem->memory[mem->size] = 0;
+    mem->responseBody[mem->size] = 0;
 
     return realsize;
 }
 
-int main(char **args)
+struct RestRequest doGet(char *url)
 {
     curl_global_init(CURL_GLOBAL_ALL);
-    printf("hello world ");
     CURL *curl = curl_easy_init();
     if (curl)
     {
         CURLcode res;
-        struct MemoryStruct chunk;
-
-        chunk.memory = malloc(1); /* will be grown as needed by the realloc above */
-        chunk.size = 0;           /* no data at this point */
-        curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+        struct RestRequest getRest;
+        getRest.url=url;
+        getRest.responseBody = malloc(1); /* will be grown as needed by the realloc above */
+        getRest.size = 0;           /* no data at this point */
+        // curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
+        curl_easy_setopt(curl, CURLOPT_URL, url);
 
         /* send all data to this function  */
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
         /* we pass our 'chunk' struct to the callback function */
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&chunk);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&getRest);
 
         /* some servers do not like requests that are made without a user-agent
      field, so we provide one */
@@ -79,17 +74,16 @@ int main(char **args)
      */
 
             // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
-            printf(">>>>>> %s <<<<<< \n", (unsigned long)chunk.memory);
         }
 
         /* cleanup curl stuff */
         curl_easy_cleanup(curl);
 
-        free(chunk.memory);
+        free(getRest.responseBody);
 
         /* we are done with libcurl, so clean it up */
         curl_global_cleanup();
 
-        return 0;
+        return getRest;
     }
 }

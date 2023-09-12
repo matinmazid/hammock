@@ -1,26 +1,14 @@
 #include <stdio.h>
-#include <ncurses.h>
 #include <stdlib.h>
 #include <strings.h>
+#include "gui.h"
+#include "webClient.h"
 
+
+#include <curl/curl.h>
+extern struct guiWindow windows[3] ;
 void destroy_win(WINDOW *local_win);
 
-/**************** STRUCTS *****************/
-struct guiWindow
-{
-	WINDOW *widowRef;
-};
-
-enum WINDOWS
-{
-	URL,
-	LEFT,
-	RIGHT
-};
-
-/**************** GLOBALS *****************/
-
-struct guiWindow windows[3];
 /**************** FUNCTIONS *****************/
 
 WINDOW *drawRightWindow(WINDOW *windowPtr)
@@ -52,7 +40,7 @@ WINDOW *drawLeftWindow(WINDOW *windowPtr)
 	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, 0);
 	box(windowsPtr, 0, 0);
 	wrefresh(windowsPtr);
-
+	
 	return windowsPtr;
 }
 
@@ -112,6 +100,7 @@ int main()
 		repaintWindows();
 		mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
 
+		doGet(url);
 		mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", url);
 		wrefresh(windows[RIGHT].widowRef);
 	}
