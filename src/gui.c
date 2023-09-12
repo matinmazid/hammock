@@ -100,8 +100,8 @@ int main()
 		repaintWindows();
 		mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
 
-		doGet(url);
-		mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", url);
+		struct RestRequest restResult= doGet(url);
+		mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", restResult.responseBody );
 		wrefresh(windows[RIGHT].widowRef);
 	}
 	while ((ch = getch()) != '\t');

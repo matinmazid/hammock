@@ -13,7 +13,7 @@ foo: foo.c
 	gcc $(CFLAGS) foo.c  -L/usr/lib -lncurses
 
 webClient.o: $(SRCDIR)webClient.c
-	gcc $(CFLAGS) -c $(SRCDIR)webClient.c  -lcurl -L/usr/lib/x86_64-linux-gnu/ 
+	gcc $(CFLAGS) -c $(SRCDIR)webClient.c   
 
 
 clean:

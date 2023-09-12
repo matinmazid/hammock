@@ -79,7 +79,7 @@ struct RestRequest doGet(char *url)
         /* cleanup curl stuff */
         curl_easy_cleanup(curl);
 
-        free(getRest.responseBody);
+        // free(getRest.responseBody);
 
         /* we are done with libcurl, so clean it up */
         curl_global_cleanup();
