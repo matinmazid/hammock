@@ -94,15 +94,22 @@ int main()
 	repaintWindows();
 
 	char url[512];
+	char requestBody[1024];
 	bzero(url, sizeof(url));
+	bzero(requestBody,sizeof(requestBody));
 
 	do {
-		repaintWindows();
 		mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
+		mvwscanw(windows[LEFT].widowRef, 1, 1, "%s", requestBody);
 
 		struct RestRequest restResult= doGet(url);
 		mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", restResult.responseBody );
+		mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--",requestBody );
+		mvwprintw(windows[URL].widowRef, 1, 1, "%s %s","GET", url );
+
 		wrefresh(windows[RIGHT].widowRef);
+		wrefresh(windows[LEFT].widowRef);
+		wrefresh(windows[URL].widowRef);
 	}
 	while ((ch = getch()) != '\t');
 
