@@ -4,9 +4,8 @@
 #include "gui.h"
 #include "webClient.h"
 
-
 #include <curl/curl.h>
-extern struct guiWindow windows[3] ;
+extern struct guiWindow windows[3];
 void destroy_win(WINDOW *local_win);
 
 /**************** FUNCTIONS *****************/
@@ -40,7 +39,7 @@ WINDOW *drawLeftWindow(WINDOW *windowPtr)
 	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, 0);
 	box(windowsPtr, 0, 0);
 	wrefresh(windowsPtr);
-	
+
 	return windowsPtr;
 }
 
@@ -80,9 +79,9 @@ void destroy_win(WINDOW *local_win)
 int main()
 {
 	int ch;
-	initscr();			  /* Start curses mode 		*/
-	cbreak();			  /* Line buffering disabled, Pass on
-					 		* everty thing to me 		*/
+	initscr(); /* Start curses mode 		*/
+	raw();
+	noecho();
 	keypad(stdscr, TRUE); /* I need that nifty F1 	*/
 	printw("Press F1 to exit");
 	refresh();
@@ -93,25 +92,56 @@ int main()
 
 	repaintWindows();
 
+	scrollok(windows[RIGHT].widowRef, true);
+	scrollok(windows[LEFT].widowRef, true);
+	scrollok(windows[URL].widowRef, true);
+
 	char url[512];
 	char requestBody[1024];
 	bzero(url, sizeof(url));
-	bzero(requestBody,sizeof(requestBody));
+	bzero(requestBody, sizeof(requestBody));
+	char *methodList[]={"GET","POST","PUT","DELETE","PATCH"};
 
-	do {
-		mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
-		mvwscanw(windows[LEFT].widowRef, 1, 1, "%s", requestBody);
+	int c = 0;
+	int methodLocation=0;
+	while (true)
+	{
+		wmove(windows[URL].widowRef, 1, 1);
+		wrefresh(windows[URL].widowRef);
+		ch = getch();
+		if (ch == '\t')
+			break;
+		else if (ch == KEY_DOWN){
+			repaintWindows();
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s", methodList[methodLocation%5]);
+			methodLocation++;
+		}
+		else if (ch == KEY_F(1)){
+			noecho();
+			bzero(url,sizeof(url));
+			repaintWindows();
+			echo();
+		}
+		else
+		{
+			url[c++] = ch;
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[methodLocation],url);
+		}
 
-		struct RestRequest restResult= doGet(url);
-		mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", restResult.responseBody );
-		mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--",requestBody );
-		mvwprintw(windows[URL].widowRef, 1, 1, "%s %s","GET", url );
+		if (ch == '\n')
+		{
+			// mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
+			struct RestRequest restResult = doGet(url);
+			mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", restResult.responseBody);
+			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", requestBody);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", "GET", url);
+		}
 
 		wrefresh(windows[RIGHT].widowRef);
 		wrefresh(windows[LEFT].widowRef);
 		wrefresh(windows[URL].widowRef);
+		// mvwscanw(windows[LEFT].widowRef, 1, 1, "%s", requestBody);
 	}
-	while ((ch = getch()) != '\t');
 
 	endwin(); /* End curses mode		  */
 	return 0;
