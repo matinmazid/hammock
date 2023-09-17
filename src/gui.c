@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+// #include <strings.h>
+#include <string.h>
 #include "gui.h"
 #include "webClient.h"
 
@@ -104,16 +105,20 @@ int main()
 
 	int c = 0;
 	int methodLocation=0;
+	wmove(windows[URL].widowRef, 1, 1);
+	wrefresh(windows[URL].widowRef);
 	while (true)
 	{
-		wmove(windows[URL].widowRef, 1, 1);
-		wrefresh(windows[URL].widowRef);
 		ch = getch();
 		if (ch == '\t')
 			break;
 		else if (ch == KEY_DOWN){
 			repaintWindows();
+			wclear(windows[URL].widowRef);
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s", methodList[methodLocation%5]);
+
+			wmove(windows[URL].widowRef, 1,strlen(methodList[methodLocation%5])+1 );
+			wrefresh(windows[URL].widowRef);
 			methodLocation++;
 		}
 		else if (ch == KEY_F(1)){
@@ -122,19 +127,24 @@ int main()
 			repaintWindows();
 			echo();
 		}
+		else if (ch == '\n')
+		{
+		
+			// mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
+			// struct RestRequest restResult = doGet(url);
+			mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", "some-result");
+			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[methodLocation], url);
+		}
+		else if (ch ==KEY_BACKSPACE){
+			url[--c]='\0';
+			wdelch(windows[URL].widowRef);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[methodLocation],url);
+		}
 		else
 		{
 			url[c++] = ch;
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[methodLocation],url);
-		}
-
-		if (ch == '\n')
-		{
-			// mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
-			struct RestRequest restResult = doGet(url);
-			mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", restResult.responseBody);
-			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", requestBody);
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", "GET", url);
 		}
 
 		wrefresh(windows[RIGHT].widowRef);
