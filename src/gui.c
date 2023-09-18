@@ -1,10 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
 // #include <strings.h>
 #include <string.h>
 #include "gui.h"
 #include "webClient.h"
-
+#include <ctype.h>
 #include <curl/curl.h>
 extern struct guiWindow windows[3];
 void destroy_win(WINDOW *local_win);
@@ -101,55 +100,77 @@ int main()
 	char requestBody[1024];
 	bzero(url, sizeof(url));
 	bzero(requestBody, sizeof(requestBody));
-	char *methodList[]={"GET","POST","PUT","DELETE","PATCH"};
+	char *methodList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
 
 	int c = 0;
-	int methodLocation=0;
+	int restMethod_ptr = 0;
 	wmove(windows[URL].widowRef, 1, 1);
 	wrefresh(windows[URL].widowRef);
 	while (true)
 	{
+		int xOffSet = strlen(methodList[restMethod_ptr % 5]);
+		wmove(windows[URL].widowRef, 1, xOffSet + 1);
 		ch = getch();
 		if (ch == '\t')
 			break;
-		else if (ch == KEY_DOWN){
-			repaintWindows();
+		else if (ch == KEY_DOWN)
+		{
 			wclear(windows[URL].widowRef);
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s", methodList[methodLocation%5]);
+			repaintWindows();
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s", methodList[abs(restMethod_ptr) % 5]);
 
-			wmove(windows[URL].widowRef, 1,strlen(methodList[methodLocation%5])+1 );
+			restMethod_ptr++;
 			wrefresh(windows[URL].widowRef);
-			methodLocation++;
 		}
-		else if (ch == KEY_F(1)){
+		else if (ch == KEY_UP)
+		{
+			// 0 1 2 3 4
+
+			if (restMethod_ptr == 0)
+				restMethod_ptr = 4; // Dont forget to change this when you add a http method
+			else
+				--restMethod_ptr;
+
+			wclear(windows[URL].widowRef);
+			repaintWindows();
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s", methodList[restMethod_ptr % 5]);
+
+			wrefresh(windows[URL].widowRef);
+		}
+		else if (ch == KEY_F(1))
+		{
 			noecho();
-			bzero(url,sizeof(url));
+			bzero(url, sizeof(url));
 			repaintWindows();
 			echo();
 		}
 		else if (ch == '\n')
 		{
-		
-			// mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
+
+			mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
 			// struct RestRequest restResult = doGet(url);
-			mvwprintw(windows[RIGHT].widowRef, 1, 2, ">>>%s<<<", "some-result");
+			mvwprintw(windows[RIGHT].widowRef, 1, 2, "%d >>>%s<<<", restMethod_ptr, methodList[restMethod_ptr % 5]);
 			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", url);
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[methodLocation], url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5], url);
+			wrefresh(windows[RIGHT].widowRef);
+			wrefresh(windows[LEFT].widowRef);
 		}
-		else if (ch ==KEY_BACKSPACE){
-			url[--c]='\0';
+		else if (ch == KEY_BACKSPACE)
+		{
+			url[--c] = '\0';
 			wdelch(windows[URL].widowRef);
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[methodLocation],url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr], url);
 		}
 		else
 		{
-			url[c++] = ch;
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[methodLocation],url);
+			if (!iscntrl(ch))
+				url[c++] = ch;
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr], url);
 		}
 
-		wrefresh(windows[RIGHT].widowRef);
-		wrefresh(windows[LEFT].widowRef);
-		wrefresh(windows[URL].widowRef);
+		// wrefresh(windows[RIGHT].widowRef);
+		// wrefresh(windows[LEFT].widowRef);
+		// wrefresh(windows[URL].widowRef);
 		// mvwscanw(windows[LEFT].widowRef, 1, 1, "%s", requestBody);
 	}
 
