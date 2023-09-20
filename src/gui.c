@@ -102,7 +102,7 @@ int main()
 	bzero(requestBody, sizeof(requestBody));
 	char *methodList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
 
-	int c = 0;
+	int urlCharIndex = 0;
 	int restMethod_ptr = 0;
 	wmove(windows[URL].widowRef, 1, 1);
 	wrefresh(windows[URL].widowRef);
@@ -117,7 +117,7 @@ int main()
 		{
 			wclear(windows[URL].widowRef);
 			repaintWindows();
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s", methodList[abs(restMethod_ptr) % 5]);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[abs(restMethod_ptr) % 5],url);
 
 			restMethod_ptr++;
 			wrefresh(windows[URL].widowRef);
@@ -133,7 +133,7 @@ int main()
 
 			wclear(windows[URL].widowRef);
 			repaintWindows();
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s", methodList[restMethod_ptr % 5]);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[abs(restMethod_ptr) % 5],url);
 
 			wrefresh(windows[URL].widowRef);
 		}
@@ -146,26 +146,35 @@ int main()
 		}
 		else if (ch == '\n')
 		{
+			char restMethod[12];
+			bzero(restMethod,sizeof(restMethod));
 
-			mvwscanw(windows[URL].widowRef, 1, 1, "%s", url);
+			mvwscanw(windows[URL].widowRef, 1, 1, "%s %s",restMethod,url);
 			// struct RestRequest restResult = doGet(url);
 			mvwprintw(windows[RIGHT].widowRef, 1, 2, "%d >>>%s<<<", restMethod_ptr, methodList[restMethod_ptr % 5]);
 			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", url);
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5], url);
 			wrefresh(windows[RIGHT].widowRef);
 			wrefresh(windows[LEFT].widowRef);
+			wrefresh(windows[URL].widowRef);
 		}
-		else if (ch == KEY_BACKSPACE)
+		else if (ch == 127) // what is back space? just del 
 		{
-			url[--c] = '\0';
-			wdelch(windows[URL].widowRef);
+			if (urlCharIndex>0){
+			url[--urlCharIndex] = '\0';
+			wclear(windows[URL].widowRef);
+			repaintWindows();
+			// wdelch(windows[URL].widowRef);
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr], url);
+			wrefresh(windows[URL].widowRef);
+			}
 		}
 		else
 		{
 			if (!iscntrl(ch))
-				url[c++] = ch;
+				url[urlCharIndex++] = ch;
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr], url);
+			wrefresh(windows[URL].widowRef);
 		}
 
 		// wrefresh(windows[RIGHT].widowRef);
