@@ -117,15 +117,14 @@ int main()
 		{
 			wclear(windows[URL].widowRef);
 			repaintWindows();
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5],url);
-
 			restMethod_ptr++;
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5], url);
+
 			wrefresh(windows[URL].widowRef);
 		}
 		else if (ch == KEY_UP)
 		{
 			// 0 1 2 3 4
-
 			if (restMethod_ptr == 0)
 				restMethod_ptr = 4; // Dont forget to change this when you add a http method
 			else
@@ -133,16 +132,9 @@ int main()
 
 			wclear(windows[URL].widowRef);
 			repaintWindows();
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5],url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5], url);
 
 			wrefresh(windows[URL].widowRef);
-		}
-		else if (ch == KEY_F(1))
-		{
-			noecho();
-			bzero(url, sizeof(url));
-			repaintWindows();
-			echo();
 		}
 		else if (ch == '\n')
 		{
@@ -155,15 +147,15 @@ int main()
 			wrefresh(windows[LEFT].widowRef);
 			wrefresh(windows[URL].widowRef);
 		}
-		else if (ch == 127) // what is back space? just del 
+		else if (ch == 127) // what is back space? just del
 		{
-			if (urlCharIndex>0){
-			url[--urlCharIndex] = '\0';
-			wclear(windows[URL].widowRef);
-			repaintWindows();
-			// wdelch(windows[URL].widowRef);
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr], url);
-			wrefresh(windows[URL].widowRef);
+			if (urlCharIndex > 0)
+			{
+				url[--urlCharIndex] = '\0';
+				wclear(windows[URL].widowRef);
+				repaintWindows();
+				mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr], url);
+				wrefresh(windows[URL].widowRef);
 			}
 		}
 		else
@@ -173,11 +165,6 @@ int main()
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr], url);
 			wrefresh(windows[URL].widowRef);
 		}
-
-		// wrefresh(windows[RIGHT].widowRef);
-		// wrefresh(windows[LEFT].widowRef);
-		// wrefresh(windows[URL].widowRef);
-		// mvwscanw(windows[LEFT].widowRef, 1, 1, "%s", requestBody);
 	}
 
 	endwin(); /* End curses mode		  */
