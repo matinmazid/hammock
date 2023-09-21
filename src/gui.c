@@ -117,7 +117,7 @@ int main()
 		{
 			wclear(windows[URL].widowRef);
 			repaintWindows();
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[abs(restMethod_ptr) % 5],url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5],url);
 
 			restMethod_ptr++;
 			wrefresh(windows[URL].widowRef);
@@ -133,7 +133,7 @@ int main()
 
 			wclear(windows[URL].widowRef);
 			repaintWindows();
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[abs(restMethod_ptr) % 5],url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5],url);
 
 			wrefresh(windows[URL].widowRef);
 		}
@@ -146,10 +146,7 @@ int main()
 		}
 		else if (ch == '\n')
 		{
-			char restMethod[12];
-			bzero(restMethod,sizeof(restMethod));
 
-			mvwscanw(windows[URL].widowRef, 1, 1, "%s %s",restMethod,url);
 			// struct RestRequest restResult = doGet(url);
 			mvwprintw(windows[RIGHT].widowRef, 1, 2, "%d >>>%s<<<", restMethod_ptr, methodList[restMethod_ptr % 5]);
 			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", url);
