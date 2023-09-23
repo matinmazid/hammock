@@ -10,7 +10,7 @@
 typedef struct RestResponse _RestResponse;
 extern char *methodNameList[];
 extern char *CommonHeaders[];
-extern _RestResponse someStuff(char * url, int handlerIndex,char ** , char *);
+extern _RestResponse executeRest(char * url, int handlerIndex,char ** , char *);
 
 struct RestRequest{
     char *url;

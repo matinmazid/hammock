@@ -100,7 +100,7 @@ int main()
 	char requestBody[1024];
 	bzero(url, sizeof(url));
 	bzero(requestBody, sizeof(requestBody));
-	char *methodList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
+	// char *methodList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
 
 	int urlCharIndex = 0;
 	int restMethod_ptr = 0;
@@ -108,7 +108,7 @@ int main()
 	wrefresh(windows[URL].widowRef);
 	while (true)
 	{
-		int xOffSet = strlen(methodList[restMethod_ptr % 5]);
+		int xOffSet = strlen(methodNameList[restMethod_ptr % 5]);
 		wmove(windows[URL].widowRef, 1, xOffSet + 1);
 		ch = getch();
 		if (ch == '\t')
@@ -118,7 +118,7 @@ int main()
 			wclear(windows[URL].widowRef);
 			repaintWindows();
 			restMethod_ptr++;
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5], url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
 
 			wrefresh(windows[URL].widowRef);
 		}
@@ -132,17 +132,17 @@ int main()
 
 			wclear(windows[URL].widowRef);
 			repaintWindows();
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5], url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
 
 			wrefresh(windows[URL].widowRef);
 		}
 		else if (ch == '\n')
 		{
-
-			// struct RestRequest restResult = doGet(url);
-			mvwprintw(windows[RIGHT].widowRef, 1, 2, "%d >>>%s<<<", restMethod_ptr, methodList[restMethod_ptr % 5]);
+			
+			struct RestResponse restResult = executeRest(url,restMethod_ptr%5, CommonHeaders,"{}");
+			mvwprintw(windows[RIGHT].widowRef, 1, 2, "%s", restResult.responseBody);
 			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", url);
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr % 5], url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
 			wrefresh(windows[RIGHT].widowRef);
 			wrefresh(windows[LEFT].widowRef);
 			wrefresh(windows[URL].widowRef);
@@ -154,7 +154,7 @@ int main()
 				url[--urlCharIndex] = '\0';
 				wclear(windows[URL].widowRef);
 				repaintWindows();
-				mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr], url);
+				mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr], url);
 				wrefresh(windows[URL].widowRef);
 			}
 		}
@@ -162,7 +162,7 @@ int main()
 		{
 			if (!iscntrl(ch))
 				url[urlCharIndex++] = ch;
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodList[restMethod_ptr], url);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr], url);
 			wrefresh(windows[URL].widowRef);
 		}
 	}

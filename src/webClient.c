@@ -18,7 +18,7 @@ extern struct RestResponse doPut(char *url, char **header, char *);
 char *methodNameList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
 methodPtr methodList[] = {&doGet, &doPut, &doPost, &doDelete, &doPatch};
 
-_RestResponse someStuff(char *url, int handlerIndex, char *headers[], char *body)
+_RestResponse executeRest(char *url, int handlerIndex, char *headers[], char *body)
 {
 
     return methodList[handlerIndex % 5](url, headers, body);
