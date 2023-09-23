@@ -1,11 +1,12 @@
 // /usr/include/x86_64-linux-gnu/curl/curl.h
-// example  https://cat-fact.herokuapp.com/facts/
+// example  
 // -L/usr/lib/x86_64-linux-gnu/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "gui.h"
 #include "webClient.h"
+#include "webClientCommon.h"
 //***
 
 char *CommonHeaders[] = {"Content-Type: application/json"};
@@ -24,40 +25,23 @@ _RestResponse executeRest(char *url, int handlerIndex, char *headers[], char *bo
     return methodList[handlerIndex % 5](url, headers, body);
 }
 
-static size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+
+struct RestResponse doPut(char *url, char **header, char *body)
 {
-    size_t realsize = size * nmemb;
-    struct RestResponse *mem = (struct RestResponse *)userp;
-
-    char *ptr = realloc(mem->responseBody, mem->size + realsize + 1);
-    if (!ptr)
-    {
-        /* out of memory! */
-        printf("not enough memory (realloc returned NULL)\n");
-        return 0;
-    }
-
-    mem->responseBody = ptr;
-    memcpy(&(mem->responseBody[mem->size]), contents, realsize);
-    mem->size += realsize;
-    mem->responseBody[mem->size] = 0;
-
-    return realsize;
-}
-
-struct RestResponse doPut(char *url, char **header, char *body) {
-struct RestResponse r;
+    struct RestResponse r;
     return r;
 }
 
-struct RestResponse doDelete(char *url, char **header, char *body) { 
+struct RestResponse doDelete(char *url, char **header, char *body)
+{
 
-struct RestResponse r;
+    struct RestResponse r;
     return r;
 }
-struct RestResponse doPatch(char *url, char **header, char *body) {
+struct RestResponse doPatch(char *url, char **header, char *body)
+{
 
-struct RestResponse r;
+    struct RestResponse r;
     return r;
 }
 
@@ -94,7 +78,7 @@ struct RestResponse doPost(char *url, char **header, char *body)
         if (res != CURLE_OK)
         {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-            getRest.responseBody="fail";
+            getRest.responseBody = "fail";
             return getRest;
         }
 
