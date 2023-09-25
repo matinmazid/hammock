@@ -4,7 +4,22 @@
 #include "webClient.h"
 #include "webClientCommon.h"
 
-size_t WriteMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
+size_t readFromMemoryCallback(char *buffer, size_t size, size_t nitems, void *userdata){
+
+    size_t writtenLength=0;
+    size_t dataLenth=strlen(userdata);
+    
+    if (size*nitems < dataLenth)
+        writtenLength =size*nitems;
+    else
+        writtenLength=dataLenth;
+    
+    buffer=(char *)userdata;
+
+    return writtenLength;
+}
+
+size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)
 {
     size_t realsize = size * nmemb;
     struct RestResponse *mem = (struct RestResponse *)userp;

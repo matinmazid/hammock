@@ -139,7 +139,7 @@ int main()
 		else if (ch == '\n')
 		{
 			
-			struct RestResponse restResult = executeRest(url,restMethod_ptr%5, CommonHeaders,"{}");
+			struct RestResponse restResult = executeRest(url,restMethod_ptr%5, CommonHeaders,"{\"a\":\"b\"}");
 			mvwprintw(windows[RIGHT].widowRef, 1, 2, "%s", restResult.responseBody);
 			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", url);
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
