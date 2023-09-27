@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include "webClient.h"
 #include "webClientCommon.h"
 
@@ -13,10 +14,9 @@ size_t readFromMemoryCallback(char *buffer, size_t size, size_t nitems, void *us
         writtenLength =size*nitems;
     else
         writtenLength=dataLenth;
-    
-    buffer=(char *)userdata;
 
-    return writtenLength;
+    memmove(userdata,buffer,writtenLength);
+   return writtenLength; 
 }
 
 size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *userp)

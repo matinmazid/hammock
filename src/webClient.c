@@ -22,7 +22,6 @@ _RestResponse executeRest(char *url, int handlerIndex, char *headers[], char *bo
     return methodList[handlerIndex % 5](url, headers, body);
 }
 
-
 struct RestResponse doPut(char *url, char **header, char *requestBody)
 {
     curl_global_init(CURL_GLOBAL_ALL);
@@ -38,16 +37,12 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
         curl_slist_append(headerList, header[0]);
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
-        curl_easy_setopt(curl,CURLOPT_READFUNCTION, readFromMemoryCallback); 
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
-         curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-        curl_easy_setopt(curl, CURLOPT_READDATA, (void *)requestBody);
+        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
+        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requestBody);
         /* we pass our 'chunk' struct to the callback function */
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&getRest);
-        curl_easy_setopt(curl,CURLOPT_INFILESIZE_LARGE,strlen(requestBody));
         /* some servers do not like requests that are made without a user-agent field, so we provide one */
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
         res = curl_easy_perform(curl);
         /* get it! */
 
@@ -143,8 +138,8 @@ struct RestResponse doGet(char *url, char **header, char *body)
         struct RestResponse getRest;
 
         getRest.url = url;
-        getRest.responseBody = malloc(1); 
-        getRest.size = 0;                 
+        getRest.responseBody = malloc(1);
+        getRest.size = 0;
 
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
@@ -162,11 +157,11 @@ struct RestResponse doGet(char *url, char **header, char *body)
         else
         {
             /*
-     * Now, our chunk.memory points to a memory block that is chunk.size
-     * bytes big and contains the remote file.
-     *
-     * Do something nice with it!
-     */
+             * Now, our chunk.memory points to a memory block that is chunk.size
+             * bytes big and contains the remote file.
+             *
+             * Do something nice with it!
+             */
 
             // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
         }
