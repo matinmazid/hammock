@@ -54,13 +54,11 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
             return getRest;
         }
 
+        curl_slist_free_all(headerList);
         /* cleanup curl stuff */
         curl_easy_cleanup(curl);
-
-        /* we are done with libcurl, so clean it up */
         curl_global_cleanup();
 
-        curl_slist_free_all(headerList);
         // there is a memory leak b/c we keep mallocing
         return getRest;
     }
