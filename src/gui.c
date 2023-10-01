@@ -100,18 +100,17 @@ int main()
 	char requestBody[1024];
 	bzero(url, sizeof(url));
 	bzero(requestBody, sizeof(requestBody));
-	// char *methodList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
 
+	int activeWindowPtr=0;
+	WINDOW * mytextWindow=windows[URL].widowRef; 
 	int urlCharIndex = 0;
 	int restMethod_ptr = 0;
-	// wmove(windows[URL].widowRef, 1, 1);
-	// wrefresh(windows[URL].widowRef);
 	while (true)
 	{
 		int xOffSet = strlen(methodNameList[restMethod_ptr % 5]);
-		wmove(windows[URL].widowRef, 1, xOffSet + 1);
-		mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
-		wrefresh(windows[URL].widowRef);
+		wmove(mytextWindow, 1, xOffSet + 1);
+		mvwprintw(mytextWindow, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
+		wrefresh(mytextWindow);
 
 		ch = getch();
 		if (ch == ('Q' & 0x1F))
@@ -134,6 +133,12 @@ int main()
 			wclear(windows[URL].widowRef);
 			repaintWindows();
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
+		}
+		else if (ch == '\t'){
+			activeWindowPtr++;
+				
+			mvwprintw(windows[LEFT].widowRef, 1, 1, "%d %s",activeWindowPtr, url);
+			wrefresh(windows[LEFT].widowRef);
 		}
 		else if (ch == '\n')
 		{
@@ -160,8 +165,8 @@ int main()
 			if (!iscntrl(ch))
 				url[urlCharIndex++] = ch;
 
-			wrefresh(windows[URL].widowRef);
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr], url);
+			wrefresh(mytextWindow);
+			mvwprintw(mytextWindow, 1, 1, "%s %s", methodNameList[restMethod_ptr], url);
 		}
 	}
 
