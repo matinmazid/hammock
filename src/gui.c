@@ -56,19 +56,19 @@ void repaintWindows(void)
 void destroy_win(WINDOW *local_win)
 {
 	/* box(local_win, ' ', ' '); : This won't produce the desired
-	 * result of erasing the window. It will leave it's four corners 
-	 * and so an ugly remnant of window. 
+	 * result of erasing the window. It will leave it's four corners
+	 * and so an ugly remnant of window.
 	 */
 	wborder(local_win, ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ');
-	/* The parameters taken are 
+	/* The parameters taken are
 	 * 1. win: the window on which to operate
-	 * 2. ls: character to be used for the left side of the window 
-	 * 3. rs: character to be used for the right side of the window 
-	 * 4. ts: character to be used for the top side of the window 
-	 * 5. bs: character to be used for the bottom side of the window 
-	 * 6. tl: character to be used for the top left corner of the window 
-	 * 7. tr: character to be used for the top right corner of the window 
-	 * 8. bl: character to be used for the bottom left corner of the window 
+	 * 2. ls: character to be used for the left side of the window
+	 * 3. rs: character to be used for the right side of the window
+	 * 4. ts: character to be used for the top side of the window
+	 * 5. bs: character to be used for the bottom side of the window
+	 * 6. tl: character to be used for the top left corner of the window
+	 * 7. tr: character to be used for the top right corner of the window
+	 * 8. bl: character to be used for the bottom left corner of the window
 	 * 9. br: character to be used for the bottom right corner of the window
 	 */
 	wrefresh(local_win);
@@ -110,8 +110,11 @@ int main()
 	{
 		int xOffSet = strlen(methodNameList[restMethod_ptr % 5]);
 		wmove(windows[URL].widowRef, 1, xOffSet + 1);
+		mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
+		wrefresh(windows[URL].widowRef);
+
 		ch = getch();
-		if (ch == '\t')
+		if (ch == ('Q' & 0x1F))
 			break;
 		else if (ch == KEY_DOWN)
 		{
@@ -119,8 +122,6 @@ int main()
 			repaintWindows();
 			restMethod_ptr++;
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
-
-			wrefresh(windows[URL].widowRef);
 		}
 		else if (ch == KEY_UP)
 		{
@@ -133,19 +134,16 @@ int main()
 			wclear(windows[URL].widowRef);
 			repaintWindows();
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
-
-			wrefresh(windows[URL].widowRef);
 		}
 		else if (ch == '\n')
 		{
-			
-			struct RestResponse restResult = executeRest(url,restMethod_ptr%5, CommonHeaders,"{\"a\":\"b\"}");
+
+			struct RestResponse restResult = executeRest(url, restMethod_ptr % 5, CommonHeaders, "{\"a\":\"b\"}");
 			mvwprintw(windows[RIGHT].widowRef, 1, 2, "%s", restResult.responseBody);
 			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", url);
 			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
 			wrefresh(windows[RIGHT].widowRef);
 			wrefresh(windows[LEFT].widowRef);
-			wrefresh(windows[URL].widowRef);
 		}
 		else if (ch == 127) // what is back space? just del
 		{
@@ -155,15 +153,15 @@ int main()
 				wclear(windows[URL].widowRef);
 				repaintWindows();
 				mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr], url);
-				wrefresh(windows[URL].widowRef);
 			}
 		}
 		else
 		{
 			if (!iscntrl(ch))
 				url[urlCharIndex++] = ch;
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr], url);
+
 			wrefresh(windows[URL].widowRef);
+			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr], url);
 		}
 	}
 

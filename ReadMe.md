@@ -1,4 +1,4 @@
-MIT License
+MIT License (Modified)
 
 Copyright (c) [2023] [Matin Mazid]
 
@@ -22,26 +22,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
-
-
-BUG:
-hitting backspace produces a null for the get. so backspace isnt working correct
-
-TODO:
-1)
-implement
-webclient
-- patch
-- delete
-
-gui
-- make <esc> the exit key
-- read input from gui
-
-2) windows for headers;
-    make the headers collapsable
-
-//
-test case
-https://httpbin.org/put
