@@ -1,3 +1,6 @@
+This software is available for use under the below terms and conditions. 
+The terms and conditions may change at any time with out notice and are applicable to contemporary version and future versions of the software, until the terms and conditions changes.
+
 MIT License (Modified)
 
 Copyright (c) [2023] [Matin Mazid]
@@ -22,3 +25,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
+
+NCURSES Licence
+https://en.wikipedia.org/wiki/Ncurses
+Text and history of the ncurses library are found here:
+https://invisible-island.net/ncurses/ncurses-license.html
+
+libCurl Licence
+https://invisible-island.net/ncurses/ncurses-license.html
+
+
+Key Actions:
+
+<CTRL> Q  Exit
+<UP ARROW> cycle up through the list of methods
+<DOWN ARROW> cycle down through the list of methods
+<RETURN> execute action.
