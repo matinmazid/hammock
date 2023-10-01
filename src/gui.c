@@ -104,8 +104,8 @@ int main()
 
 	int urlCharIndex = 0;
 	int restMethod_ptr = 0;
-	wmove(windows[URL].widowRef, 1, 1);
-	wrefresh(windows[URL].widowRef);
+	// wmove(windows[URL].widowRef, 1, 1);
+	// wrefresh(windows[URL].widowRef);
 	while (true)
 	{
 		int xOffSet = strlen(methodNameList[restMethod_ptr % 5]);
