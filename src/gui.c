@@ -46,9 +46,9 @@ WINDOW *drawLeftWindow(WINDOW *windowPtr)
 void repaintWindows(void)
 {
 
-	windows[RIGHT].widowRef = drawRightWindow(windows[RIGHT].widowRef);
-	windows[LEFT].widowRef = drawLeftWindow(windows[LEFT].widowRef);
-	windows[URL].widowRef = drawUrlBox(windows[URL].widowRef);
+	windows[RIGHT].windowRef = drawRightWindow(windows[RIGHT].windowRef);
+	windows[LEFT].windowRef = drawLeftWindow(windows[LEFT].windowRef);
+	windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
 
 	return;
 }
@@ -86,41 +86,45 @@ int main()
 	printw("Press F1 to exit");
 	refresh();
 
-	windows[RIGHT].widowRef = NULL;
-	windows[LEFT].widowRef = NULL;
-	windows[URL].widowRef = NULL;
+	windows[RIGHT].windowRef = NULL;
+	windows[LEFT].windowRef = NULL;
+	windows[URL].windowRef = NULL;
+
+	// create a valid pointer
+	windows[RIGHT].content = calloc(0,sizeof(char));
+	windows[LEFT].content = calloc(0,sizeof(char));
+	windows[URL].content = calloc(0,sizeof(char));
 
 	repaintWindows();
 
-	scrollok(windows[RIGHT].widowRef, true);
-	scrollok(windows[LEFT].widowRef, true);
-	scrollok(windows[URL].widowRef, true);
+	scrollok(windows[RIGHT].windowRef, true);
+	scrollok(windows[LEFT].windowRef, true);
+	scrollok(windows[URL].windowRef, true);
 
-	char url[512];
-	char requestBody[1024];
-	bzero(url, sizeof(url));
-	bzero(requestBody, sizeof(requestBody));
+	// char url[512];
+	// char requestBody[1024];
+	// bzero(url, sizeof(url));
+	// bzero(requestBody, sizeof(requestBody));
 
-	int activeWindowPtr=0;
-	WINDOW * mytextWindow=windows[URL].widowRef; 
+	int activeWindowPtr = 0;
 	int urlCharIndex = 0;
 	int restMethod_ptr = 0;
 	while (true)
 	{
 		int xOffSet = strlen(methodNameList[restMethod_ptr % 5]);
-		wmove(mytextWindow, 1, xOffSet + 1);
-		mvwprintw(mytextWindow, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
-		wrefresh(mytextWindow);
+		wmove(windows[URL].windowRef, 1, xOffSet + 1);
+		wrefresh(windows[activeWindowPtr %2].windowRef);
 
 		ch = getch();
 		if (ch == ('Q' & 0x1F))
 			break;
 		else if (ch == KEY_DOWN)
 		{
-			wclear(windows[URL].widowRef);
+			wclear(windows[URL].windowRef);
 			repaintWindows();
 			restMethod_ptr++;
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
+			mvwprintw(windows[URL].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], 
+			windows[activeWindowPtr %2].content);
 		}
 		else if (ch == KEY_UP)
 		{
@@ -130,43 +134,51 @@ int main()
 			else
 				--restMethod_ptr;
 
-			wclear(windows[URL].widowRef);
+			wclear(windows[URL].windowRef);
 			repaintWindows();
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
+			mvwprintw(windows[URL].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], 
+			windows[URL].content);
 		}
-		else if (ch == '\t'){
+		else if (ch == '\t')
+		{
 			activeWindowPtr++;
-				
-			mvwprintw(windows[LEFT].widowRef, 1, 1, "%d %s",activeWindowPtr, url);
-			wrefresh(windows[LEFT].widowRef);
+
+			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%d %s", activeWindowPtr,windows[activeWindowPtr %2].content );
+			wrefresh(windows[activeWindowPtr % 2].windowRef);
 		}
 		else if (ch == '\n')
 		{
 
-			struct RestResponse restResult = executeRest(url, restMethod_ptr % 5, CommonHeaders, "{\"a\":\"b\"}");
-			mvwprintw(windows[RIGHT].widowRef, 1, 2, "%s", restResult.responseBody);
-			mvwprintw(windows[LEFT].widowRef, 1, 2, "--%s--", url);
-			mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], url);
-			wrefresh(windows[RIGHT].widowRef);
-			wrefresh(windows[LEFT].widowRef);
+			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5, CommonHeaders, "{\"a\":\"b\"}");
+			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s", restResult.responseBody);
+			mvwprintw(windows[URL].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], 
+			windows[URL].content);
+			wrefresh(windows[RIGHT].windowRef);
 		}
 		else if (ch == 127) // what is back space? just del
 		{
 			if (urlCharIndex > 0)
 			{
-				url[--urlCharIndex] = '\0';
-				wclear(windows[URL].widowRef);
+				windows[URL].content[--urlCharIndex] = '\0';
+				wclear(windows[URL].windowRef);
 				repaintWindows();
-				mvwprintw(windows[URL].widowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr], url);
+				mvwprintw(windows[URL].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr], windows[URL].content);
 			}
 		}
 		else
 		{
 			if (!iscntrl(ch))
-				url[urlCharIndex++] = ch;
+			{
+				unsigned int oldStrLen = strlen(windows[URL].content);
+				char *tmp = calloc(oldStrLen + 1, sizeof(char));
+				tmp[oldStrLen]=ch;
+				memcpy(tmp, windows[activeWindowPtr % 2].content, oldStrLen);
+				
+				free(windows[activeWindowPtr % 2].content);
+				windows[activeWindowPtr % 2].content = tmp;
+			}
 
-			wrefresh(mytextWindow);
-			mvwprintw(mytextWindow, 1, 1, "%s %s", methodNameList[restMethod_ptr], url);
+			mvwprintw( windows[activeWindowPtr % 2].windowRef, 1, 1, "%s %s" , methodNameList[restMethod_ptr], windows[activeWindowPtr %2 ].content);
 		}
 	}
 

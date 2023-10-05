@@ -10,7 +10,8 @@
 /**************** STRUCTS *****************/
 struct guiWindow
 {
-	WINDOW *widowRef;
+	WINDOW *windowRef;
+	char *content;
 };
 
 enum WINDOWS
