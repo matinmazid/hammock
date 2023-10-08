@@ -53,6 +53,16 @@ void repaintWindows(void)
 	return;
 }
 
+void updateUserInputBox(struct guiWindow guiWindow, char userInputChar)
+{
+
+	if (guiWindow.windowRef == windows[URL].windowRef)
+		mvwprintw(guiWindow.windowRef, 1, 1, "%s", guiWindow.content);
+	else
+		mvwprintw(guiWindow.windowRef, 1, 1, "%s", guiWindow.content);
+	return;
+}
+
 void destroy_win(WINDOW *local_win)
 {
 	/* box(local_win, ' ', ' '); : This won't produce the desired
@@ -104,7 +114,6 @@ int main()
 	int activeWindowPtr = 0;
 	int urlCharIndex = 0;
 	int restMethod_ptr = 0;
-
 	// start us  off by printting out a GET instructions
 	mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 
@@ -117,16 +126,15 @@ int main()
 		ch = getch();
 		if (ch == ('Q' & 0x1F))
 			break;
-		else if (ch == KEY_DOWN)
+		else if ((ch == KEY_DOWN) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
 		{
 			restMethod_ptr++;
 			wclear(windows[URL].windowRef);
 			// repaintWindows();
-			windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
-			mvwprintw(windows[URL].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5],
-					  windows[activeWindowPtr % 2].content);
+			windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
+			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 		}
-		else if (ch == KEY_UP)
+		else if ((ch == KEY_UP) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
 		{
 			// 0 1 2 3 4
 			if (restMethod_ptr == 0)
@@ -134,6 +142,8 @@ int main()
 			else
 				--restMethod_ptr;
 
+			// split out the method and throw it away;
+			
 			wclear(windows[URL].windowRef);
 			// repaintWindows();
 			windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
@@ -149,8 +159,8 @@ int main()
 		else if (ch == '\n')
 		{
 
-			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5, 
-			CommonHeaders, "{\"a\":\"b\"}");
+			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5,
+														 CommonHeaders, "{\"a\":\"b\"}");
 			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s", restResult.responseBody);
 			// mvwprintw(windows[URL].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], windows[URL].content);
 			wrefresh(windows[RIGHT].windowRef);
@@ -161,8 +171,7 @@ int main()
 			{
 				windows[URL].content[--urlCharIndex] = '\0';
 				wclear(windows[URL].windowRef);
-				// repaintWindows();
-				mvwprintw(windows[URL].windowRef, 1, 1, "%s",  windows[URL].content);
+				mvwprintw(windows[URL].windowRef, 1, 1, "%s", windows[URL].content);
 			}
 		}
 		else
@@ -178,12 +187,8 @@ int main()
 				windows[activeWindowPtr % 2].content = tmp;
 			}
 
-			if (windows[activeWindowPtr % 2].windowRef == windows[URL].windowRef)
-				mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s",  windows[activeWindowPtr % 2].content);
-			else
-				mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s",  windows[activeWindowPtr % 2].content);
-
-			wmove(windows[activeWindowPtr % 2].windowRef, 1, oldStrLen+6);
+			updateUserInputBox(windows[activeWindowPtr % 2],ch);
+			wmove(windows[activeWindowPtr % 2].windowRef, 1, oldStrLen);
 		}
 	}
 
