@@ -111,8 +111,11 @@ int main()
 	{
 
 		wclear(windows[activeWindowPtr % 2].windowRef);
-		mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1,
-				  "%s %s", methodNameList[restMethod_ptr % 4], windows[activeWindowPtr % 2].content);
+		if (windows[activeWindowPtr % 2].windowRef == windows[URL].windowRef)
+			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 4], windows[activeWindowPtr % 2].content);
+		else
+			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
+
 		// wmove(windows[activeWindowPtr % 2].windowRef, 1, strlen(windows[activeWindowPtr % 2].content));
 		box(windows[activeWindowPtr % 2].windowRef, 0, 0);
 		wrefresh(windows[activeWindowPtr % 2].windowRef);
@@ -183,13 +186,13 @@ int main()
 			{
 				char value;
 				value = (char)ch;
-				int  newStrLen;
-				char *oldPtr=windows[activeWindowPtr % 2].content;
-				newStrLen=strlen(windows[activeWindowPtr % 2].content)+1;
+				int newStrLen;
+				char *oldPtr = windows[activeWindowPtr % 2].content;
+				newStrLen = strlen(windows[activeWindowPtr % 2].content) + 1;
 
 				windows[activeWindowPtr % 2].content = calloc(newStrLen, 1);
-				windows[activeWindowPtr % 2].content = memcpy(windows[activeWindowPtr % 2].content, oldPtr, newStrLen-1);
-				windows[activeWindowPtr % 2].content[newStrLen-1] = value;
+				windows[activeWindowPtr % 2].content = memcpy(windows[activeWindowPtr % 2].content, oldPtr, newStrLen - 1);
+				windows[activeWindowPtr % 2].content[newStrLen - 1] = value;
 				windows[activeWindowPtr % 2].content[newStrLen] = '\0';
 			}
 		}
