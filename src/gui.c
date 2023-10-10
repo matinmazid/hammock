@@ -53,16 +53,6 @@ void repaintWindows(void)
 	return;
 }
 
-void updateUserInputBox(struct guiWindow guiWindow, char userInputChar)
-{
-
-	if (guiWindow.windowRef == windows[URL].windowRef)
-		mvwprintw(guiWindow.windowRef, 1, 1, "%s", guiWindow.content);
-	else
-		mvwprintw(guiWindow.windowRef, 1, 1, "%s", guiWindow.content);
-	return;
-}
-
 void destroy_win(WINDOW *local_win)
 {
 	/* box(local_win, ' ', ' '); : This won't produce the desired
@@ -103,8 +93,8 @@ int main()
 	// create a valid pointer
 	windows[RIGHT].content = calloc(0, sizeof(char));
 	windows[LEFT].content = calloc(0, sizeof(char));
-	windows[URL].content = calloc(0, sizeof("GET") + 1);
-	windows[URL].content = memcpy(windows[URL].content, "GET ", sizeof("GET") + 1);
+	windows[URL].content = calloc(1, sizeof(char));
+	// windows[URL].content = memcpy(windows[URL].content, "GET ", sizeof("GET") + 1);
 	repaintWindows();
 
 	scrollok(windows[RIGHT].windowRef, true);
@@ -112,7 +102,6 @@ int main()
 	scrollok(windows[URL].windowRef, true);
 
 	int activeWindowPtr = 0;
-	int urlCharIndex = 0;
 	int restMethod_ptr = 0;
 	// start us  off by printting out a GET instructions
 	mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
@@ -120,12 +109,21 @@ int main()
 	// eventLoop
 	while (true)
 	{
-		wmove(windows[activeWindowPtr % 2].windowRef, 1, strlen(windows[activeWindowPtr % 2].content));
-		wrefresh(windows[activeWindowPtr % 2].windowRef);
 
+		wclear(windows[activeWindowPtr % 2].windowRef);
+		mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1,
+				  "%s %s", methodNameList[restMethod_ptr % 4], windows[activeWindowPtr % 2].content);
+		// wmove(windows[activeWindowPtr % 2].windowRef, 1, strlen(windows[activeWindowPtr % 2].content));
+		box(windows[activeWindowPtr % 2].windowRef, 0, 0);
+		wrefresh(windows[activeWindowPtr % 2].windowRef);
+		bzero(&ch, sizeof(int));
 		ch = getch();
 		if (ch == ('Q' & 0x1F))
 			break;
+		else if (ch == ERR)
+		{
+			continue;
+		}
 		else if ((ch == KEY_DOWN) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
 		{
 			restMethod_ptr++;
@@ -143,7 +141,7 @@ int main()
 				--restMethod_ptr;
 
 			// split out the method and throw it away;
-			
+
 			wclear(windows[URL].windowRef);
 			// repaintWindows();
 			windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
@@ -167,28 +165,33 @@ int main()
 		}
 		else if (ch == 127) // what is back space? just del
 		{
-			if (urlCharIndex > 0)
+			unsigned int existingLength = strlen(windows[activeWindowPtr % 2].content);
+			if (existingLength > 0)
 			{
-				windows[URL].content[--urlCharIndex] = '\0';
-				wclear(windows[URL].windowRef);
-				mvwprintw(windows[URL].windowRef, 1, 1, "%s", windows[URL].content);
+				char *tmp = calloc(existingLength - 1, 1);
+				memcpy(tmp, windows[activeWindowPtr % 2].content, existingLength - 1);
+				// tmp[existingLength - 1] = '\0';
+				free(windows[activeWindowPtr % 2].content);
+				windows[activeWindowPtr % 2].content = tmp;
+				wclear(windows[activeWindowPtr % 2].windowRef);
+				mvwprintw(windows[URL].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 4], windows[URL].content);
 			}
 		}
 		else
 		{
-			unsigned int oldStrLen = strlen(windows[activeWindowPtr % 2].content);
 			if (!iscntrl(ch))
 			{
-				char *tmp = calloc(oldStrLen + 1, sizeof(char));
-				tmp[oldStrLen] = ch;
-				memcpy(tmp, windows[activeWindowPtr % 2].content, oldStrLen);
+				char value;
+				value = (char)ch;
+				int  newStrLen;
+				char *oldPtr=windows[activeWindowPtr % 2].content;
+				newStrLen=strlen(windows[activeWindowPtr % 2].content)+1;
 
-				free(windows[activeWindowPtr % 2].content);
-				windows[activeWindowPtr % 2].content = tmp;
+				windows[activeWindowPtr % 2].content = calloc(newStrLen, 1);
+				windows[activeWindowPtr % 2].content = memcpy(windows[activeWindowPtr % 2].content, oldPtr, newStrLen-1);
+				windows[activeWindowPtr % 2].content[newStrLen-1] = value;
+				windows[activeWindowPtr % 2].content[newStrLen] = '\0';
 			}
-
-			updateUserInputBox(windows[activeWindowPtr % 2],ch);
-			wmove(windows[activeWindowPtr % 2].windowRef, 1, oldStrLen);
 		}
 	}
 
