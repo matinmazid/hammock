@@ -42,17 +42,7 @@ Key Actions:
 <CTRL> Q  Exit
 <UP ARROW> cycle up through the list of methods
 <DOWN ARROW> cycle down through the list of methods
-<RETURN> execute action.
+<CTRL-e> execute action.
 
-
----- dev how to handle control char
-#define CTRL(x) ((x) & 0x1f)
-
-#define QUIT            CTRL('Q')
-
--- failing test case
-url = abcdefghijklmnopqrstuvw
-url = zxcvbnmasdfghjklqwertyu
-then enter x
 
 ps -ef|grep hammock|grep -v grep|sed "s/\s\+/ /g" |cut -d' '  -f2
