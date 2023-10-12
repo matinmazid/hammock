@@ -53,6 +53,19 @@ void repaintWindows(void)
 	return;
 }
 
+void appendChar(int newChar, int activeWindowPtr)
+{
+
+	int newStrLen;
+	char *oldPtr = windows[activeWindowPtr % 2].content;
+	newStrLen = strlen(windows[activeWindowPtr % 2].content) + 1;
+	// - there is a memmory leak here
+	windows[activeWindowPtr % 2].content = calloc(newStrLen, 1);
+	windows[activeWindowPtr % 2].content = memcpy(windows[activeWindowPtr % 2].content, oldPtr, newStrLen - 1);
+	windows[activeWindowPtr % 2].content[newStrLen - 1] = newChar;
+	windows[activeWindowPtr % 2].content[newStrLen] = '\0';
+}
+
 void destroy_win(WINDOW *local_win)
 {
 	/* box(local_win, ' ', ' '); : This won't produce the desired
@@ -116,12 +129,12 @@ int main()
 		else
 			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 
-		// wmove(windows[activeWindowPtr % 2].windowRef, 1, strlen(windows[activeWindowPtr % 2].content));
 		box(windows[activeWindowPtr % 2].windowRef, 0, 0);
 		wrefresh(windows[activeWindowPtr % 2].windowRef);
-		bzero(&ch, sizeof(int));
+
 		ch = getch();
-		if (ch == ('Q' & 0x1F))
+
+		if (ch == CTRL('Q'))
 			break;
 		else if (ch == ERR)
 		{
@@ -129,41 +142,41 @@ int main()
 		}
 		else if ((ch == KEY_DOWN) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
 		{
-			restMethod_ptr++;
-			wclear(windows[URL].windowRef);
-			// repaintWindows();
-			windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
-			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
+
+				restMethod_ptr++;
+				wclear(windows[URL].windowRef);
+				// repaintWindows();
+				windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
+				mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 		}
 		else if ((ch == KEY_UP) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
 		{
-			// 0 1 2 3 4
-			if (restMethod_ptr == 0)
-				restMethod_ptr = 4; // Dont forget to change this when you add a http method
-			else
-				--restMethod_ptr;
+				// 0 1 2 3 4
+				if (restMethod_ptr == 0)
+					restMethod_ptr = 4; // Dont forget to change this when you add a http method
+				else
+					--restMethod_ptr;
 
-			// split out the method and throw it away;
+				// split out the method and throw it away;
 
-			wclear(windows[URL].windowRef);
-			// repaintWindows();
-			windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
-			mvwprintw(windows[URL].windowRef, 1, 1, "%s", windows[URL].content);
+				wclear(windows[URL].windowRef);
+				// repaintWindows();
+				windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
+				mvwprintw(windows[URL].windowRef, 1, 1, "%s", windows[URL].content);
 		}
-		else if (ch == '\t')
+		else if (ch == CTRL('\t'))
 		{
 			activeWindowPtr++;
 
 			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 			wrefresh(windows[activeWindowPtr % 2].windowRef);
 		}
-		else if (ch == '\n')
+		else if (ch == CTRL('e'))
 		{
 
 			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5,
 														 CommonHeaders, "{\"a\":\"b\"}");
 			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s", restResult.responseBody);
-			// mvwprintw(windows[URL].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 5], windows[URL].content);
 			wrefresh(windows[RIGHT].windowRef);
 		}
 		else if (ch == 127) // what is back space? just del
@@ -173,7 +186,6 @@ int main()
 			{
 				char *tmp = calloc(existingLength - 1, 1);
 				memcpy(tmp, windows[activeWindowPtr % 2].content, existingLength - 1);
-				// tmp[existingLength - 1] = '\0';
 				free(windows[activeWindowPtr % 2].content);
 				windows[activeWindowPtr % 2].content = tmp;
 				wclear(windows[activeWindowPtr % 2].windowRef);
@@ -182,18 +194,9 @@ int main()
 		}
 		else
 		{
-			if (!iscntrl(ch))
+			if (!iscntrl(ch) || ch == '\n')
 			{
-				char value;
-				value = (char)ch;
-				int newStrLen;
-				char *oldPtr = windows[activeWindowPtr % 2].content;
-				newStrLen = strlen(windows[activeWindowPtr % 2].content) + 1;
-
-				windows[activeWindowPtr % 2].content = calloc(newStrLen, 1);
-				windows[activeWindowPtr % 2].content = memcpy(windows[activeWindowPtr % 2].content, oldPtr, newStrLen - 1);
-				windows[activeWindowPtr % 2].content[newStrLen - 1] = value;
-				windows[activeWindowPtr % 2].content[newStrLen] = '\0';
+				appendChar(ch, activeWindowPtr);
 			}
 		}
 	}
