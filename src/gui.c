@@ -5,6 +5,7 @@
 #include "webClient.h"
 #include <ctype.h>
 #include <curl/curl.h>
+#include "menu.h"
 extern struct guiWindow windows[3];
 void destroy_win(WINDOW *local_win);
 
@@ -140,6 +141,9 @@ int main()
 		{
 			continue;
 		}
+		else if (ch== 263){
+			doMenu();
+		}
 		else if ((ch == KEY_DOWN) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
 		{
 
@@ -175,7 +179,7 @@ int main()
 		{
 
 			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5,
-														 CommonHeaders, windows[LEFT].content);
+														 ContentTypes, windows[LEFT].content);
 			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s", restResult.responseBody);
 			mvwprintw(windows[LEFT].windowRef,1,1,"%s", windows[LEFT].content);
 			wrefresh(windows[RIGHT].windowRef);
