@@ -9,7 +9,7 @@
 // TODo create a typedef for RestRequest
 typedef struct RestResponse _RestResponse;
 extern char *methodNameList[];
-extern char *CommonHeaders[];
+extern char *ContentTypes[];
 extern _RestResponse executeRest(char * url, int handlerIndex,char ** , char *);
 
 struct RestRequest{
