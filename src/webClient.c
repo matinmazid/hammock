@@ -6,7 +6,12 @@
 #include "webClientCommon.h"
 //***
 
-char *CommonHeaders[] = {"Content-Type: application/json"};
+char *ContentTypes[] = {"Content-Type: application/json",
+"Content-Type: application/psv",
+"Content-Type: application/csv",
+"Content-Type: application/json"
+
+};
 extern struct RestResponse doGet(char *url, char **header, char *);
 extern struct RestResponse doPost(char *url, char **header, char *);
 extern struct RestResponse doDelete(char *url, char **header, char *);
