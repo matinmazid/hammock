@@ -141,8 +141,13 @@ int main()
 		{
 			continue;
 		}
-		else if (ch== 263){
+		else if (ch== 263){ // ctrl H
 			doMenu();
+		
+		box(windows[LEFT].windowRef, 0, 0);
+		box(windows[RIGHT].windowRef, 0, 0);
+		wrefresh(windows[LEFT].windowRef);
+		wrefresh(windows[RIGHT].windowRef);
 		}
 		else if ((ch == KEY_DOWN) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
 		{
