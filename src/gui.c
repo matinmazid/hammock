@@ -1,11 +1,19 @@
 #include <stdlib.h>
 // #include <strings.h>
 #include <string.h>
+#ifndef __HAMMOCK_GUI_H 
 #include "gui.h"
+#endif
 #include "webClient.h"
 #include <ctype.h>
 #include <curl/curl.h>
+
+#include <menu.h>
 #include "menu.h"
+#include <curses.h>
+
+extern void  doMenu();
+
 extern struct guiWindow windows[3];
 void destroy_win(WINDOW *local_win);
 
@@ -99,7 +107,20 @@ int main()
 	keypad(stdscr, TRUE); /* I need that nifty F1 	*/
 	printw("Press F1 to exit");
 	refresh();
+// //
+//     WINDOW *my_menu_win;
+//     ITEM **menuItemsList;
+//     ITEM *currentMenuItem;
+//     MENU *headerMenu;
+//     int nHeaderTypeCount = 4;
+//     menuItemsList=(ITEM**)calloc(nHeaderTypeCount +1,sizeof(ITEM *));
+//     menuItemsList[0]=new_item("json","content type json");
+//     menuItemsList[1]=(ITEM *)NULL;
+//     headerMenu=new_menu((ITEM **) menuItemsList);
+//    
+    // my_menu_win = newwin(10, 40, 4, 4);
 
+    // box(my_menu_win, 5, 5);
 	windows[RIGHT].windowRef = NULL;
 	windows[LEFT].windowRef = NULL;
 	windows[URL].windowRef = NULL;
@@ -141,13 +162,14 @@ int main()
 		{
 			continue;
 		}
-		else if (ch== 263){ // ctrl H
+		else if (ch== 263){ // ctrl H for Headers
+
 			doMenu();
-		
-		box(windows[LEFT].windowRef, 0, 0);
-		box(windows[RIGHT].windowRef, 0, 0);
-		wrefresh(windows[LEFT].windowRef);
-		wrefresh(windows[RIGHT].windowRef);
+			// post_menu(headerMenu);
+			box(windows[LEFT].windowRef, 0, 0);
+			box(windows[RIGHT].windowRef, 0, 0);
+			wrefresh(windows[LEFT].windowRef);
+			wrefresh(windows[RIGHT].windowRef);
 		}
 		else if ((ch == KEY_DOWN) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
 		{

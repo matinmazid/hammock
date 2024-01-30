@@ -1,16 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "gui.h"
 #include "webClient.h"
 #include "webClientCommon.h"
 //***
 
-char *ContentTypes[] = {"Content-Type: application/json",
+char *ContentTypes[] = {
+"Content-Type: application/json",
 "Content-Type: application/psv",
 "Content-Type: application/csv",
 "Content-Type: application/json"
-
 };
 extern struct RestResponse doGet(char *url, char **header, char *);
 extern struct RestResponse doPost(char *url, char **header, char *);
