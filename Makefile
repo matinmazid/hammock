@@ -15,9 +15,13 @@ hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o
 run_hammock: hammock
 	./hammock
 
+gad: gad.c
+	gcc $(CFLAGS) gad.c  -L/mnt/c/Users/matin/src/c/ncurses/lib \
+	-lmenu -lncurses 
+
 foo: foo.c
 	gcc $(CFLAGS) foo.c  -L/mnt/c/Users/matin/src/c/ncurses/lib \
-	-lncurses -lmenu
+	-lmenu -lncurses 
 
 webClient.o: $(SRCDIR)webClient.c  $(SRCDIR)webClientCommon.c 
 	gcc $(CFLAGS) -c $(SRCDIR)webClient.c   
