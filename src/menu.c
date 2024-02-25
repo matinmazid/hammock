@@ -7,8 +7,10 @@
 
 char *choices[] = {
 	"json",
-    "csv"
-
+    "csv",
+    "html",
+    "custom",
+    (char *) NULL
 };
 extern void doMenu();
 
@@ -29,8 +31,8 @@ void doMenu()
     ITEM *currentMenuItem;
     MENU *headerMenu;
 
-    my_menu_win = newwin(10, 40, 0, 0);
-    box(my_menu_win, 1, 1);
+    // my_menu_win = newwin(10, 40, 0, 0);
+    // box(my_menu_win, 1, 1);
 
     // try to get the ArraySize Macro working
     /* available ContentType json
@@ -50,22 +52,28 @@ void doMenu()
     post_menu(headerMenu);
     refresh();
     int c;
-    while ((c = wgetch(my_menu_win)) != 'h')
+    nl();
+    while ((c = getch()) != '\n')
     {
+        ITEM* currentItemptr;
         switch (c)
         {
             case KEY_DOWN:
                 menu_driver(headerMenu, REQ_DOWN_ITEM);
+                 currentItemptr= current_item(headerMenu);
                 break;
             case KEY_UP:
-            default:
-                break;
-        }
-        break;
+                menu_driver(headerMenu, REQ_UP_ITEM);
+                 currentItemptr= current_item(headerMenu);
+                break; 
+        } 
     }
 
-    free_item(menuItemsList[0]);
-    free_item(menuItemsList[1]);
+    nonl();
+    for(int i=0;i<nHeaderTypeCount;++i)
+    {
+        free_item(menuItemsList[i]);
+    }
     free_menu(headerMenu);
     return;
 }
