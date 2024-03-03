@@ -45,4 +45,4 @@ Key Actions:
 <CTRL-e> execute action.
 
 
-ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2
+gdb -p `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`

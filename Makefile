@@ -15,6 +15,9 @@ hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o
 run_hammock: hammock
 	./hammock
 
+debug_hammock: hammock
+	gdb -p `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`
+
 gad: gad.c
 	gcc $(CFLAGS) gad.c  -L/mnt/c/Users/matin/src/c/ncurses/lib \
 	-lmenu -lncurses 
@@ -32,6 +35,3 @@ menu.o: $(SRCDIR)menu.c
 
 clean:
 	rm -rf hammock webClient.o webClientCommon.o menu.o
-
-touch: 
-	touch $(SRCDIR)gui.c
