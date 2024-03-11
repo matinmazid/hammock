@@ -162,7 +162,8 @@ int main()
 		{
 			continue;
 		}
-		else if (ch== 263){ // ctrl H for Headers
+		// else if (ch== 263){ // ctrl H for Headers
+		else if (ch== CTRL('H')){ // ctrl H for Headers
 
 			doMenu();
 			// post_menu(headerMenu);

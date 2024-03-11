@@ -34,6 +34,18 @@ https://invisible-island.net/ncurses/ncurses-license.html
 libCurl Licence
 https://invisible-island.net/ncurses/ncurses-license.html
 
+Dev environment setup
+1. install curl dev library with headers
+eg
+```
+apt-get install libcurl4-openssl-dev
+```
+
+2. install ncures dev library with  headers
+eg
+```
+ apt-get install libncurses5-dev libncursesw5-dev
+```
 
 *********** NB *********************
 this repo is not ready for pull requests

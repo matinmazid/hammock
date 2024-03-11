@@ -4,7 +4,7 @@ SRCDIR := src/
 hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o 
 	gcc $(CFLAGS) $(SRCDIR)gui.c -o hammock \
 	 menu.o \
-	 -L/mnt/c/Users/matin/src/c/ncurses/lib -lmenu -lncurses webClient.o \
+	 -lmenu -lncurses webClient.o \
 	 webClientCommon.o  \
 	 -lcurl -L/usr/lib/x86_64-linux-gnu/ 
 	chmod u+x hammock
@@ -19,11 +19,11 @@ debug_hammock: hammock
 	gdb -p `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`
 
 gad: gad.c
-	gcc $(CFLAGS) gad.c  -L/mnt/c/Users/matin/src/c/ncurses/lib \
+	gcc $(CFLAGS) gad.c   \
 	-lmenu -lncurses 
 
 foo: foo.c
-	gcc $(CFLAGS) foo.c  -L/mnt/c/Users/matin/src/c/ncurses/lib \
+	gcc $(CFLAGS) foo.c   \
 	-lmenu -lncurses 
 
 webClient.o: $(SRCDIR)webClient.c  $(SRCDIR)webClientCommon.c 
