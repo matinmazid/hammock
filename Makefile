@@ -18,6 +18,9 @@ run_hammock: hammock
 debug_hammock: hammock
 	gdb -p `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`
 
+kill_hammock:
+	kill `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`
+
 gad: gad.c
 	gcc $(CFLAGS) gad.c   \
 	-lmenu -lncurses 

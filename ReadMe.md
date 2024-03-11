@@ -1,3 +1,8 @@
+
+*********** NB *********************
+this repo is not ready for pull requests
+Key Actions:
+
 This software is available for use under the below terms and conditions. 
 The terms and conditions may change at any time with out notice and are applicable to contemporary version and future versions of the software, until the terms and conditions changes.
 
@@ -47,14 +52,16 @@ eg
  apt-get install libncurses5-dev libncursesw5-dev
 ```
 
-*********** NB *********************
-this repo is not ready for pull requests
-Key Actions:
+test server
+https://httpbin.org/
 
+
+# GUI actions
 <CTRL> Q  Exit
 <UP ARROW> cycle up through the list of methods
 <DOWN ARROW> cycle down through the list of methods
 <CTRL-e> execute action.
+<CTRL-H> select header
 
 
 gdb -p `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`
