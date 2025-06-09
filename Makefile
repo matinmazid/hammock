@@ -1,12 +1,14 @@
 CFLAGS := -g
 SRCDIR := src/
+export CPPFLAGS="-I/opt/homebrew/opt/curl/include"
+export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
 
 hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o 
 	gcc $(CFLAGS) $(SRCDIR)gui.c -o hammock \
 	 menu.o \
 	 -lmenu -lncurses webClient.o \
 	 webClientCommon.o  \
-	 -lcurl -L/usr/lib/x86_64-linux-gnu/ 
+	 -lcurl 
 	chmod u+x hammock
 
 # hammock:  $(SRCDIR)gui.c 
