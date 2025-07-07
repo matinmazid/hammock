@@ -11,7 +11,7 @@ hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o
 	 -lmenu -lncurses $(OBJECTS)webClient.o \
 	 $(OBJECTS)webClientCommon.o  \
 	 -lcurl 
-	chmod u+x hammock
+	chmod u+x $(BIN)hammock
 
 # hammock:  $(SRCDIR)gui.c 
 # 	gcc  $(SRCDIR)gui.c -o hammock -L/mnt/c/Users/matin/src/c/ncurses/lib -lncurses -lmenu 
@@ -45,4 +45,4 @@ menu.o: $(SRCDIR)menu.c
 	gcc $(CFLAGS) -c  $(SRCDIR)menu.c -o $(OBJECTS)menu.o 
 
 clean:
-	rm -rf hammock webClient.o webClientCommon.o menu.o
+	rm -rf $(BIN)* $(OBJECTS)/*
