@@ -228,7 +228,7 @@ int main()
 		}
 		else
 		{
-			if (!iscntrl(ch) || ch == '\n')
+			if ((!iscntrl(ch) || ch == '\n')&&((activeWindowPtr%2)!=URL))
 			{
 				appendChar(ch, activeWindowPtr);
 			}

@@ -6,7 +6,7 @@ export CPPFLAGS="-I/opt/homebrew/opt/curl/include"
 export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
 
 hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o 
-	gcc $(CFLAGS) $(SRCDIR)gui.c -o $(BIN)hammock \
+	gcc $(CFLAGS) -g $(SRCDIR)gui.c -o $(BIN)hammock \
 	 $(OBJECTS)menu.o \
 	 -lmenu -lncurses $(OBJECTS)webClient.o \
 	 $(OBJECTS)webClientCommon.o  \

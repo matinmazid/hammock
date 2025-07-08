@@ -66,6 +66,7 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
         // there is a memory leak b/c we keep mallocing
         return getRest;
     }
+    return (struct RestResponse){NULL, NULL, 0};
 }
 
 struct RestResponse doDelete(char *url, char **header, char *body)
@@ -128,6 +129,7 @@ struct RestResponse doPost(char *url, char **header, char *body)
         // there is a memory leak b/c we keep mallocing
         return getRest;
     }
+    return (struct RestResponse){NULL, NULL, 0};
 }
 
 struct RestResponse doGet(char *url, char **header, char *body)
@@ -178,4 +180,5 @@ struct RestResponse doGet(char *url, char **header, char *body)
 
         return getRest;
     }
+    return (struct RestResponse){NULL, NULL, 0};
 }
