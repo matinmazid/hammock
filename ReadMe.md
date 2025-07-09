@@ -61,6 +61,7 @@ https://httpbin.org/
 <UP ARROW> cycle up through the list of methods
 <DOWN ARROW> cycle down through the list of methods
 <CTRL-e> execute action.
+<enter> while in the url bar: execute action
 <CTRL-H> select header
 
 

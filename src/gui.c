@@ -172,7 +172,7 @@ int main()
 			wrefresh(windows[LEFT].windowRef);
 			wrefresh(windows[RIGHT].windowRef);
 		}
-		else if ((ch == KEY_DOWN) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
+		else if ((ch == KEY_DOWN) && (activeWindowPtr % 2==URL))
 		{
 
 				restMethod_ptr++;
@@ -181,7 +181,7 @@ int main()
 				windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
 				mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 		}
-		else if ((ch == KEY_UP) && (windows[URL].windowRef && windows[activeWindowPtr % 2].windowRef))
+		else if ((ch == KEY_UP) && (activeWindowPtr % 2==URL))
 		{
 				// 0 1 2 3 4
 				if (restMethod_ptr == 0)
@@ -203,7 +203,7 @@ int main()
 			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 			wrefresh(windows[activeWindowPtr % 2].windowRef);
 		}
-		else if (ch == CTRL('e'))
+		else if ((ch == CTRL('e'))||(ch=='\n')&& activeWindowPtr%2==URL)
 		{
 
 			// matin look here
@@ -228,7 +228,9 @@ int main()
 		}
 		else
 		{
-			if ((!iscntrl(ch) || ch == '\n')&&((activeWindowPtr%2)!=URL))
+			// if the character is not a control character or a newline	
+			// and we are not in the URL window
+			if (!iscntrl(ch) || ch != '\n')
 			{
 				appendChar(ch, activeWindowPtr);
 			}
