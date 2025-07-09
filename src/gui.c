@@ -105,22 +105,8 @@ int main()
 	raw();
 	noecho();
 	keypad(stdscr, TRUE); /* I need that nifty F1 	*/
-	printw("Press F1 to exit");
-	refresh();
-// //
-//     WINDOW *my_menu_win;
-//     ITEM **menuItemsList;
-//     ITEM *currentMenuItem;
-//     MENU *headerMenu;
-//     int nHeaderTypeCount = 4;
-//     menuItemsList=(ITEM**)calloc(nHeaderTypeCount +1,sizeof(ITEM *));
-//     menuItemsList[0]=new_item("json","content type json");
-//     menuItemsList[1]=(ITEM *)NULL;
-//     headerMenu=new_menu((ITEM **) menuItemsList);
-//    
-    // my_menu_win = newwin(10, 40, 4, 4);
 
-    // box(my_menu_win, 5, 5);
+	refresh();
 	windows[RIGHT].windowRef = NULL;
 	windows[LEFT].windowRef = NULL;
 	windows[URL].windowRef = NULL;
@@ -172,7 +158,7 @@ int main()
 			wrefresh(windows[LEFT].windowRef);
 			wrefresh(windows[RIGHT].windowRef);
 		}
-		else if ((ch == KEY_DOWN) && (activeWindowPtr % 2==URL))
+		else if ((ch == KEY_DOWN) && (activeWindowPtr % 2==URL)) // cycle down
 		{
 
 				restMethod_ptr++;
@@ -181,7 +167,7 @@ int main()
 				windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
 				mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 		}
-		else if ((ch == KEY_UP) && (activeWindowPtr % 2==URL))
+		else if ((ch == KEY_UP) && (activeWindowPtr % 2==URL)) // cycle up
 		{
 				// 0 1 2 3 4
 				if (restMethod_ptr == 0)
