@@ -3,6 +3,7 @@
 #include <string.h>
 #include "webClient.h"
 #include "webClientCommon.h"
+#include "log.h"
 //***
 
 char *ContentTypes[] = {
@@ -151,7 +152,7 @@ struct RestResponse doGet(char *url, char **header, char *body)
         struct RestResponse restData;
 
         restData.url = url;
-        restData.responseBody = malloc(1);
+        restData.responseBody = NULL;
         restData.size = 0;
 
         curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -159,8 +160,9 @@ struct RestResponse doGet(char *url, char **header, char *body)
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&restData);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
+        log_debug("sub system url execution for %s", url);
         res = curl_easy_perform(curl);
-
+        log_debug("sub system url execution url %s bytes read %d", url, restData.size);
         struct RestResponse restResults ;
         /* check for errors */
         if (res != CURLE_OK)

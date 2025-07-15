@@ -56,13 +56,6 @@ test server
 https://httpbin.org/
 
 
-# GUI actions
-<CTRL> : Q  Exit
-<UP ARROW> while in the url bar: cycle up through the list of methods
-<DOWN ARROW> while in the url bar:  cycle down through the list of methods
-<CTRL-e> execute action.
-<enter> while in the url bar: execute action
-<CTRL-H> select header
-
+gui.c contains main()
 
 gdb -p `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`

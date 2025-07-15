@@ -1,17 +1,19 @@
 #include <stdlib.h>
 // #include <strings.h>
 #include <string.h>
+
 #ifndef __HAMMOCK_GUI_H
 #include "gui.h"
 #endif
+
 #include "webClient.h"
 #include <ctype.h>
 #include <curl/curl.h>
-
 #include <menu.h>
 #include "menu.h"
 #include <curses.h>
-
+#include <stdio.h>
+#include "log.h"
 // tmp
 #include<time.h>
 extern void doMenu();
@@ -69,12 +71,13 @@ void appendChar(int newChar, int activeWindowPtr)
 
 	int newStrLen;
 	char *oldPtr = windows[activeWindowPtr % 2].content;
-	newStrLen = strlen(windows[activeWindowPtr % 2].content) + 1;
+	newStrLen = strlen(windows[activeWindowPtr % 2].content); 
 	// - there is a memmory leak here
-	windows[activeWindowPtr % 2].content = calloc(newStrLen, 1);
-	windows[activeWindowPtr % 2].content = memcpy(windows[activeWindowPtr % 2].content, oldPtr, newStrLen - 1);
-	windows[activeWindowPtr % 2].content[newStrLen - 1] = newChar;
-	windows[activeWindowPtr % 2].content[newStrLen] = '\0';
+
+	char * newStr = calloc(newStrLen+5, sizeof(char));
+	memset(newStr, '\0', newStrLen + 4); // clear the memory
+	windows[activeWindowPtr % 2].content = memcpy(newStr, oldPtr, newStrLen );
+	windows[activeWindowPtr % 2].content[newStrLen] = (char)newChar;
 }
 
 void destroy_win(WINDOW *local_win)
@@ -102,11 +105,17 @@ void destroy_win(WINDOW *local_win)
 /****************************** MAIN **********************/
 int main()
 {
+	// set up logging
 	int ch;
 	initscr(); /* Start curses mode 		*/
 	raw();
 	noecho();
 	keypad(stdscr, TRUE); /* I need that nifty F1 	*/
+
+	// set logging
+	FILE *logFile = fopen("hammock.log", "a");
+	if (logFile != NULL)
+		log_add_fp(logFile,LOG_DEBUG);
 
 	refresh();
 	windows[RIGHT].windowRef = NULL;
@@ -116,7 +125,7 @@ int main()
 	// create a valid pointer
 	windows[RIGHT].content = calloc(0, sizeof(char));
 	windows[LEFT].content = calloc(0, sizeof(char));
-	windows[URL].content = calloc(1, sizeof(char));
+	windows[URL].content = calloc(2, sizeof(char));
 	// windows[URL].content = memcpy(windows[URL].content, "GET ", sizeof("GET") + 1);
 	repaintWindows();
 
@@ -194,16 +203,12 @@ int main()
 		}
 		else if ((ch == CTRL('e')) || (ch == '\n' && activeWindowPtr % 2 == URL))
 		{
+			log_trace("Executing REST call: %s", windows[URL].content);
 			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5,
 					ContentTypes, windows[LEFT].content);
 			
-			time_t now = time(NULL);
-			struct  tm *t = localtime(&now);
-			char buf[64];
-			strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", t);
-			
-			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s \n---\n %s @ %s", restResult.responseBody, 
-			restResult.client_message,buf);
+			log_trace("REST call executed: %s", restResult.responseBody);
+			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s  ", restResult.responseBody );
 
 			mvwprintw(windows[LEFT].windowRef, 1, 1, "%s", windows[LEFT].content);
 			wrefresh(windows[RIGHT].windowRef);
@@ -213,13 +218,10 @@ int main()
 			unsigned int existingLength = strlen(windows[activeWindowPtr % 2].content);
 			if (existingLength > 0)
 			{
-				char *tmp = calloc(existingLength , 1);
-				// memcpy(tmp, windows[activeWindowPtr % 2].content, existingLength - 1);
-				memmove(tmp, windows[activeWindowPtr % 2].content, existingLength - 1);
-				free(windows[activeWindowPtr % 2].content);
-				windows[activeWindowPtr % 2].content = tmp;
+				windows[activeWindowPtr % 2].content[existingLength - 1] = '\0';	
 				wclear(windows[activeWindowPtr % 2].windowRef);
-				mvwprintw(windows[URL].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 4], windows[URL].content);
+				mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 4], 
+					windows[activeWindowPtr %2 ].content);
 			}
 		}
 		else
@@ -234,5 +236,12 @@ int main()
 	}
 
 	endwin(); /* End curses mode		  */
+
+	// close log file
+	if (logFile != NULL)
+	{
+		fclose(logFile);
+	}
 	return 0;
 }
+

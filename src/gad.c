@@ -12,26 +12,42 @@
 #include <menu.h>
 #include "menu.h"
 #include <curses.h>
-
+#include "webClient.h"
+#include "log.h"
 extern void doMenu();
 
 int main(){
 
-			/* matin remove this */ 
-			static struct RestResponse foo;
-			foo.responseBody = malloc(3); 
-			const char *baloney="this is some baloney content ";
-			static int ctr=0;
-			static int totalValue;
-			char intValue[200];
-			for (int i = 0; i < 100; i++)
-			{
-				ctr++;
-				bzero(intValue, 200);
-				int len_baloney = strlen(baloney);
-				totalValue = ctr + len_baloney  ;
-				snprintf(intValue,sizeof(intValue), "%s, %d %d", baloney, totalValue,i);
-				printf("%s\n", intValue);
-			}
+	char* request[]={
+		"https://google.com",
+		"https://yahoo.com",
+		"https://disney.com",
+		"https://google.ca",
+		"https://yahoo.ca",
+		"https://google.com",
+		"https://bing.com",
+		"https://duckduckgo.com",
+		"https://github.com"
+	};
+
+	size_t requestSize = sizeof(request) / sizeof(request[0]);
+
+	for (int x=0; x<requestSize; x++){
+		struct RestResponse r;
+		log_info("Executing request: %s", request[x]);
+		int strLen= strlen(request[x]);
+		char *urlPtr= calloc(strLen + 1, sizeof(char));
+		if (urlPtr == NULL) 
+			log_error("Memory allocation failed for URL pointer");
+
+		memcpy(urlPtr, request[x], strLen);	
+		r=executeRest(urlPtr,0, ContentTypes, "");
+		printf("Response URL: %s\n", r.url);
+		printf("Response Body: %s\n", r.responseBody);
+		printf("Response Size: %zu\n", r.size);
+		printf("Response Status Code: %d\n", r.statusCode);
+		printf("Response Client Message: %s\n", r.client_message);	
+		log_info("--------- DONE ---------- %s %d ", request[x], x);
+	}
 
 }
