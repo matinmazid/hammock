@@ -11,14 +11,23 @@ char *ContentTypes[] = {
 "Content-Type: application/csv",
 "Content-Type: application/json"
 };
+
 extern struct RestResponse doGet(char *url, char **header, char *);
 extern struct RestResponse doPost(char *url, char **header, char *);
 extern struct RestResponse doDelete(char *url, char **header, char *);
 extern struct RestResponse doPatch(char *url, char **header, char *);
 extern struct RestResponse doPut(char *url, char **header, char *);
+extern char *  webclient_statusCodeStr(enum STATUS_CODES statusCode);
 
 char *methodNameList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
 methodPtr methodList[] = {&doGet, &doPut, &doPost, &doDelete, &doPatch};
+
+
+char *  webclient_statusCodeStr(enum STATUS_CODES statusCode)
+{
+
+    return STATUS_CODE_STRINGS[statusCode];
+}
 
 _RestResponse executeRest(char *url, int handlerIndex, char *headers[], char *body)
 {
@@ -34,10 +43,10 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
     if (curl)
     {
         CURLcode res;
-        struct RestResponse getRest;
-        getRest.url = url;
-        getRest.responseBody = malloc(1); /* will be grown as needed by the realloc */
-        getRest.size = 0;                 /* no data at this point */
+        struct RestResponse restData;
+        restData.url = url;
+        restData.responseBody = malloc(1); /* will be grown as needed by the realloc */
+        restData.size = 0;                 /* no data at this point */
         curl_slist_append(headerList, header[0]);
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -45,7 +54,7 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerList);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, requestBody);
         /* we pass our 'chunk' struct to the callback function */
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&getRest);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&restData);
         /* some servers do not like requests that are made without a user-agent field, so we provide one */
         res = curl_easy_perform(curl);
         /* get it! */
@@ -54,8 +63,8 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
         if (res != CURLE_OK)
         {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-            getRest.responseBody = "fail";
-            return getRest;
+            restData.responseBody = "fail";
+            return restData;
         }
 
         curl_slist_free_all(headerList);
@@ -64,7 +73,7 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
         curl_global_cleanup();
 
         // there is a memory leak b/c we keep mallocing
-        return getRest;
+        return restData;
     }
     return (struct RestResponse){NULL, NULL, 0};
 }
@@ -72,13 +81,13 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
 struct RestResponse doDelete(char *url, char **header, char *body)
 {
 
-    struct RestResponse r;
+    struct RestResponse r={0};
     return r;
 }
 struct RestResponse doPatch(char *url, char **header, char *body)
 {
 
-    struct RestResponse r;
+    struct RestResponse r={0};
     return r;
 }
 
@@ -90,10 +99,10 @@ struct RestResponse doPost(char *url, char **header, char *body)
     if (curl)
     {
         CURLcode res;
-        struct RestResponse getRest;
-        getRest.url = url;
-        getRest.responseBody = malloc(1); /* will be grown as needed by the realloc */
-        getRest.size = 0;                 /* no data at this point */
+        struct RestResponse restData;
+        restData.url = url;
+        restData.responseBody = malloc(1); /* will be grown as needed by the realloc */
+        restData.size = 0;                 /* no data at this point */
         curl_slist_append(headerList, header[0]);
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
@@ -103,7 +112,7 @@ struct RestResponse doPost(char *url, char **header, char *body)
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
 
         /* we pass our 'chunk' struct to the callback function */
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&getRest);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&restData);
 
         /* some servers do not like requests that are made without a user-agent field, so we provide one */
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
@@ -115,8 +124,8 @@ struct RestResponse doPost(char *url, char **header, char *body)
         if (res != CURLE_OK)
         {
             fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-            getRest.responseBody = "fail";
-            return getRest;
+            restData.responseBody = "fail";
+            return restData;
         }
 
         /* cleanup curl stuff */
@@ -127,7 +136,7 @@ struct RestResponse doPost(char *url, char **header, char *body)
 
         curl_slist_free_all(headerList);
         // there is a memory leak b/c we keep mallocing
-        return getRest;
+        return restData;
     }
     return (struct RestResponse){NULL, NULL, 0};
 }
@@ -139,46 +148,48 @@ struct RestResponse doGet(char *url, char **header, char *body)
     if (curl)
     {
         CURLcode res;
-        struct RestResponse getRest;
+        struct RestResponse restData;
 
-        getRest.url = url;
-        getRest.responseBody = malloc(1);
-        getRest.size = 0;
+        restData.url = url;
+        restData.responseBody = malloc(1);
+        restData.size = 0;
 
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeMemoryCallback);
-        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&getRest);
+        curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)&restData);
         curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 
         res = curl_easy_perform(curl);
 
+        struct RestResponse restResults ;
         /* check for errors */
         if (res != CURLE_OK)
         {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n",
-                    curl_easy_strerror(res));
+                restResults.url = url,
+                restResults.responseBody = restData.responseBody,
+                restResults.size = restData.size,
+                restResults.statusCode = CLIENT_ERROR,
+                restResults.client_message = (char *)curl_easy_strerror(res)
+            ;
         }
         else
         {
-            /*
-             * Now, our chunk.memory points to a memory block that is chunk.size
-             * bytes big and contains the remote file.
-             *
-             * Do something nice with it!
-             */
-
-            // printf("%lu bytes retrieved\n", (unsigned long)chunk.size);
+            restResults.url = url;
+            restResults.responseBody = restData.responseBody;
+            restResults.size = restData.size;
+            restResults.statusCode = CLIENT_SUCCESS;
+            restResults.client_message = webclient_statusCodeStr(CLIENT_SUCCESS);
         }
 
         /* cleanup curl stuff */
         curl_easy_cleanup(curl);
 
-        // free(getRest.responseBody);
+        // free(restData.responseBody);
 
         /* we are done with libcurl, so clean it up */
         curl_global_cleanup();
 
-        return getRest;
+        return restResults;
     }
     return (struct RestResponse){NULL, NULL, 0};
 }

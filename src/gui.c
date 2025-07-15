@@ -1,7 +1,7 @@
 #include <stdlib.h>
 // #include <strings.h>
 #include <string.h>
-#ifndef __HAMMOCK_GUI_H 
+#ifndef __HAMMOCK_GUI_H
 #include "gui.h"
 #endif
 #include "webClient.h"
@@ -12,7 +12,9 @@
 #include "menu.h"
 #include <curses.h>
 
-extern void  doMenu();
+// tmp
+#include<time.h>
+extern void doMenu();
 
 extern struct guiWindow windows[3];
 void destroy_win(WINDOW *local_win);
@@ -149,7 +151,8 @@ int main()
 			continue;
 		}
 		// else if (ch== 263){ // ctrl H for Headers
-		else if (ch== CTRL('H')){ // ctrl H for Headers
+		else if (ch == CTRL('H'))
+		{ // ctrl H for Headers
 
 			doMenu();
 			// post_menu(headerMenu);
@@ -158,45 +161,51 @@ int main()
 			wrefresh(windows[LEFT].windowRef);
 			wrefresh(windows[RIGHT].windowRef);
 		}
-		else if ((ch == KEY_DOWN) && (activeWindowPtr % 2==URL)) // cycle down
+		else if ((ch == KEY_DOWN) && (activeWindowPtr % 2 == URL)) // cycle down
 		{
 
-				restMethod_ptr++;
-				wclear(windows[URL].windowRef);
-				// repaintWindows();
-				windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
-				mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
+			restMethod_ptr++;
+			wclear(windows[URL].windowRef);
+			// repaintWindows();
+			windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
+			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 		}
-		else if ((ch == KEY_UP) && (activeWindowPtr % 2==URL)) // cycle up
+		else if ((ch == KEY_UP) && (activeWindowPtr % 2 == URL)) // cycle up
 		{
-				// 0 1 2 3 4
-				if (restMethod_ptr == 0)
-					restMethod_ptr = 4; // Dont forget to change this when you add a http method
-				else
-					--restMethod_ptr;
+			// 0 1 2 3 4
+			if (restMethod_ptr == 0)
+				restMethod_ptr = 4; // Dont forget to change this when you add a http method
+			else
+				--restMethod_ptr;
 
-				// split out the method and throw it away;
+			// split out the method and throw it away;
 
-				wclear(windows[URL].windowRef);
-				// repaintWindows();
-				windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
-				mvwprintw(windows[URL].windowRef, 1, 1, "%s", windows[URL].content);
+			wclear(windows[URL].windowRef);
+			// repaintWindows();
+			windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
+			mvwprintw(windows[URL].windowRef, 1, 1, "%s", windows[URL].content);
 		}
-		else if (ch == CTRL('\t'))
+		else if (ch == CTRL('\t')) // switch window
 		{
 			activeWindowPtr++;
 
 			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 			wrefresh(windows[activeWindowPtr % 2].windowRef);
 		}
-		else if ((ch == CTRL('e'))||(ch=='\n')&& activeWindowPtr%2==URL)
+		else if ((ch == CTRL('e')) || (ch == '\n' && activeWindowPtr % 2 == URL))
 		{
-
-			// matin look here
 			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5,
-														 ContentTypes, windows[LEFT].content);
-			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s", restResult.responseBody);
-			mvwprintw(windows[LEFT].windowRef,1,1,"%s", windows[LEFT].content);
+					ContentTypes, windows[LEFT].content);
+			
+			time_t now = time(NULL);
+			struct  tm *t = localtime(&now);
+			char buf[64];
+			strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", t);
+			
+			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s \n---\n %s @ %s", restResult.responseBody, 
+			restResult.client_message,buf);
+
+			mvwprintw(windows[LEFT].windowRef, 1, 1, "%s", windows[LEFT].content);
 			wrefresh(windows[RIGHT].windowRef);
 		}
 		else if (ch == 127) // what is back space? just del
@@ -204,8 +213,9 @@ int main()
 			unsigned int existingLength = strlen(windows[activeWindowPtr % 2].content);
 			if (existingLength > 0)
 			{
-				char *tmp = calloc(existingLength - 1, 1);
-				memcpy(tmp, windows[activeWindowPtr % 2].content, existingLength - 1);
+				char *tmp = calloc(existingLength , 1);
+				// memcpy(tmp, windows[activeWindowPtr % 2].content, existingLength - 1);
+				memmove(tmp, windows[activeWindowPtr % 2].content, existingLength - 1);
 				free(windows[activeWindowPtr % 2].content);
 				windows[activeWindowPtr % 2].content = tmp;
 				wclear(windows[activeWindowPtr % 2].windowRef);
@@ -214,7 +224,7 @@ int main()
 		}
 		else
 		{
-			// if the character is not a control character or a newline	
+			// if the character is not a control character or a newline
 			// and we are not in the URL window
 			if (!iscntrl(ch) || ch != '\n')
 			{

@@ -57,9 +57,9 @@ https://httpbin.org/
 
 
 # GUI actions
-<CTRL> Q  Exit
-<UP ARROW> cycle up through the list of methods
-<DOWN ARROW> cycle down through the list of methods
+<CTRL> : Q  Exit
+<UP ARROW> while in the url bar: cycle up through the list of methods
+<DOWN ARROW> while in the url bar:  cycle down through the list of methods
 <CTRL-e> execute action.
 <enter> while in the url bar: execute action
 <CTRL-H> select header

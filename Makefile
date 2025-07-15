@@ -1,4 +1,4 @@
-CFLAGS := -g
+CFLAGS := -g -Wall
 SRCDIR := src/
 OBJECTS := objects/
 BIN := bin/
@@ -6,7 +6,7 @@ export CPPFLAGS="-I/opt/homebrew/opt/curl/include"
 export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
 
 hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o 
-	gcc $(CFLAGS) -g $(SRCDIR)gui.c -o $(BIN)hammock \
+	gcc $(CFLAGS) -g $(SRCDIR)gui.c  -o $(BIN)hammock \
 	 $(OBJECTS)menu.o \
 	 -lmenu -lncurses $(OBJECTS)webClient.o \
 	 $(OBJECTS)webClientCommon.o  \
@@ -20,15 +20,13 @@ hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o
 run_hammock: hammock
 	./hammock
 
-debug_hammock: hammock
-	gdb -p `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`
-
-kill_hammock:
-	kill `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`
-
-gad: gad.c
-	gcc $(CFLAGS) gad.c   \
-	-lmenu -lncurses 
+gad: src/gad.c
+	gcc $(CFLAGS)  -g $(SRCDIR)gad.c -o $(BIN)gad \
+	 $(OBJECTS)menu.o \
+	 -lmenu -lncurses $(OBJECTS)webClient.o \
+	 $(OBJECTS)webClientCommon.o  \
+	 -lcurl 
+	chmod u+x $(BIN)gad
 
 foo: foo.c
 	gcc $(CFLAGS) foo.c   \

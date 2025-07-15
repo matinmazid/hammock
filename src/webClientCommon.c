@@ -5,6 +5,12 @@
 #include "webClient.h"
 #include "webClientCommon.h"
 
+
+char *STATUS_CODE_STRINGS[] = {
+    "CLIENT_ERROR",
+    "CLIENT_SUCCESS"
+};
+
 size_t readFromMemoryCallback(char *buffer, size_t size, size_t nitems, void *userdata){
 
     size_t writtenLength=0;
@@ -27,15 +33,16 @@ size_t writeMemoryCallback(void *contents, size_t size, size_t nmemb, void *user
     char *ptr = realloc(mem->responseBody, mem->size + realsize + 1);
     if (!ptr)
     {
-        /* out of memory! */
-        printf("not enough memory (realloc returned NULL)\n");
+        mem->client_message="Not enough memory (realloc failed)";
+        mem->statusCode = CLIENT_ERROR;
         return 0;
     }
 
     mem->responseBody = ptr;
+    bzero(&(mem->responseBody[mem->size]), realsize + 1);
     memcpy(&(mem->responseBody[mem->size]), contents, realsize);
+    mem->statusCode = CLIENT_SUCCESS;
     mem->size += realsize;
-    mem->responseBody[mem->size] = 0;
 
     return realsize;
 }

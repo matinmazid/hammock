@@ -25,9 +25,7 @@ extern char* ContentTypes[];
 void doMenu()
 {
 
-    WINDOW* my_menu_win;
     ITEM** menuItemsList;
-    ITEM* currentMenuItem;
     MENU* headerMenu;
 
     // my_menu_win = newwin(10, 40, 0, 0);
@@ -58,8 +56,6 @@ void doMenu()
 
     while ((c = getch()) != '\n')
     {
-        ITEM* currentItemptr;
-        char* myHdr ;
         switch (c)
         {
             case KEY_DOWN:
@@ -71,9 +67,6 @@ void doMenu()
         }
     }
 
-    ITEM* currentItemptr;
-    currentItemptr = current_item(headerMenu);
-    char* myHdr = (char*)item_userptr(currentItemptr);
     nonl();
 
     for (int i = 0;i < nHeaderTypeCount;++i)
