@@ -181,9 +181,7 @@ int main()
 		{
 
 			restMethod_ptr++;
-			// wclear(windows[URL].windowRef);
 			windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
-			// mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 		}
 		else if ((ch == KEY_UP) && (activeWindowPtr % 2 == URL)) // cycle up
 		{
@@ -195,7 +193,6 @@ int main()
 			else
 				restMethod_ptr--; // this will cycle through 0-4
 
-			// wclear(windows[URL].windowRef);
 			windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
 		}
 		else if (ch == CTRL('\t')) // switch window
