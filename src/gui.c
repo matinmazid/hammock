@@ -124,9 +124,9 @@ int main()
 
 	// create a valid pointer
 	windows[RIGHT].content = calloc(0, sizeof(char));
-	windows[LEFT].content = calloc(0, sizeof(char));
+	windows[LEFT].content = calloc(2, sizeof(char));
 	windows[URL].content = calloc(2, sizeof(char));
-	// windows[URL].content = memcpy(windows[URL].content, "GET ", sizeof("GET") + 1);
+	// draw the initial window
 	repaintWindows();
 
 	scrollok(windows[RIGHT].windowRef, true);
@@ -161,12 +161,13 @@ int main()
 		ch = getch();
 
 		if (ch == CTRL('Q'))
+			// exit the program loop
 			break;
 		else if (ch == ERR)
 		{
+			// skip the error and keep going
 			continue;
 		}
-		// else if (ch== 263){ // ctrl H for Headers
 		else if (ch == CTRL('H'))
 		{ // ctrl H for Headers
 
@@ -193,14 +194,11 @@ int main()
 			else
 				restMethod_ptr--; // this will cycle through 0-4
 
-			windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
 		}
 		else if (ch == CTRL('\t')) // switch window
 		{
 			activeWindowPtr++;
 
-			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
-			wrefresh(windows[activeWindowPtr % 2].windowRef);
 		}
 		else if ((ch == CTRL('e')) || (ch == '\n' && activeWindowPtr % 2 == URL))
 		{
@@ -210,8 +208,6 @@ int main()
 			
 			log_trace("REST call executed: %s", restResult.responseBody);
 			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s  ", restResult.responseBody );
-
-			mvwprintw(windows[LEFT].windowRef, 1, 1, "%s", windows[LEFT].content);
 			wrefresh(windows[RIGHT].windowRef);
 		}
 		else if (ch == 127) // what is back space? just del
@@ -220,9 +216,6 @@ int main()
 			if (existingLength > 0)
 			{
 				windows[activeWindowPtr % 2].content[existingLength - 1] = '\0';	
-				wclear(windows[activeWindowPtr % 2].windowRef);
-				mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 4], 
-					windows[activeWindowPtr %2 ].content);
 			}
 		}
 		else
