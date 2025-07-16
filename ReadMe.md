@@ -30,7 +30,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
+## Additional licences
 NCURSES Licence
 https://en.wikipedia.org/wiki/Ncurses
 Text and history of the ncurses library are found here:
@@ -42,7 +42,8 @@ https://invisible-island.net/ncurses/ncurses-license.html
 log.c
 https://github.com/rxi/log.c.git
 
-Dev environment setup
+## Dev environment setup
+### Prerequisites
 1. install curl dev library with headers
 eg
 ```
@@ -54,11 +55,26 @@ eg
 ```
  apt-get install libncurses5-dev libncursesw5-dev
 ```
+### Create work directory and compile
+1. clone 
+```
+git clone https://github.com/matinmazid/hammock.git
+```
+2. compile
+```
+cd hammock
+make
+```
+### Run
+compiled artifacts are in hammock/bin
+```
+./bin/hammock
+```
+
+
+# NOTES
+gui.c contains main()
+gad.c is a toy program to help diagnose issues
 
 test server
 https://httpbin.org/
-
-
-gui.c contains main()
-
-gdb -p `ps -ef|grep hammock |grep -v grep |sed 's/\s\+/ /g'| cut -d' ' -f2`

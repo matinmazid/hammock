@@ -72,8 +72,9 @@ void appendChar(int newChar, int activeWindowPtr)
 	int newStrLen;
 	char *oldPtr = windows[activeWindowPtr % 2].content;
 	newStrLen = strlen(windows[activeWindowPtr % 2].content); 
-	// - there is a memmory leak here
 
+	// we are adding wasting 5 bytes here to make sure we dont buffer overrun
+	// I'll fix it later
 	char * newStr = calloc(newStrLen+5, sizeof(char));
 	memset(newStr, '\0', newStrLen + 4); // clear the memory
 	windows[activeWindowPtr % 2].content = memcpy(newStr, oldPtr, newStrLen );
@@ -222,7 +223,7 @@ int main()
 		{
 			// if the character is not a control character or a newline
 			// and we are not in the URL window
-			if (!iscntrl(ch) || ch != '\n')
+			if (ch=='\n'||(!iscntrl(ch)))
 			{
 				appendChar(ch, activeWindowPtr);
 			}
