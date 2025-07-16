@@ -39,6 +39,9 @@ https://invisible-island.net/ncurses/ncurses-license.html
 libCurl Licence
 https://invisible-island.net/ncurses/ncurses-license.html
 
+log.c
+https://github.com/rxi/log.c.git
+
 Dev environment setup
 1. install curl dev library with headers
 eg
