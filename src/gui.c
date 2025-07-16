@@ -144,9 +144,16 @@ int main()
 
 		wclear(windows[activeWindowPtr % 2].windowRef);
 		if (windows[activeWindowPtr % 2].windowRef == windows[URL].windowRef)
-			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s %s", methodNameList[restMethod_ptr % 4], windows[activeWindowPtr % 2].content);
+		{
+			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s %s", 
+				methodNameList[restMethod_ptr % 5], 
+				windows[activeWindowPtr % 2].content);
+		}
 		else
-			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
+		{
+			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", 
+				windows[activeWindowPtr % 2].content);
+		}
 
 		box(windows[activeWindowPtr % 2].windowRef, 0, 0);
 		wrefresh(windows[activeWindowPtr % 2].windowRef);
@@ -175,24 +182,22 @@ int main()
 
 			restMethod_ptr++;
 			wclear(windows[URL].windowRef);
-			// repaintWindows();
 			windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
 			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
 		}
 		else if ((ch == KEY_UP) && (activeWindowPtr % 2 == URL)) // cycle up
 		{
 			// 0 1 2 3 4
-			if (restMethod_ptr == 0)
-				restMethod_ptr = 4; // Dont forget to change this when you add a http method
-			else
-				--restMethod_ptr;
-
+			// if (restMethod_ptr == 0)
+			// 	restMethod_ptr = 4; // Dont forget to change this when you add a http method
+			// else
+			// 	--restMethod_ptr;
+			restMethod_ptr=abs((restMethod_ptr - 1) % 5); // this will cycle through 0-4
 			// split out the method and throw it away;
 
 			wclear(windows[URL].windowRef);
 			// repaintWindows();
 			windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
-			mvwprintw(windows[URL].windowRef, 1, 1, "%s", windows[URL].content);
 		}
 		else if (ch == CTRL('\t')) // switch window
 		{
