@@ -21,14 +21,14 @@ hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o log.o
 run_hammock: hammock
 	./hammock
 
-gad: src/gad.c
-	gcc $(CFLAGS)  -g $(SRCDIR)gad.c -o $(BIN)gad \
+scratch: src/scratch.c
+	gcc $(CFLAGS)  -g $(SRCDIR)scratch.c -o $(BIN)gad \
 	 $(OBJECTS)menu.o \
 	 -lmenu -lncurses $(OBJECTS)webClient.o \
 	 $(OBJECTS)webClientCommon.o  \
 	 -lcurl \
 	 $(OBJECTS)log.o
-	chmod u+x $(BIN)gad
+	chmod u+x $(BIN)scratch
 
 foo: foo.c
 	gcc $(CFLAGS) foo.c   \

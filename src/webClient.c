@@ -7,24 +7,24 @@
 //***
 
 char *ContentTypes[] = {
-"Content-Type: application/json",
-"Content-Type: application/psv",
-"Content-Type: application/csv",
-"Content-Type: application/json"
-};
+    "Content-Type: application/json",
+    "Content-Type: application/psv",
+    "Content-Type: application/csv",
+    "Content-Type: application/json"};
 
 extern struct RestResponse doGet(char *url, char **header, char *);
 extern struct RestResponse doPost(char *url, char **header, char *);
 extern struct RestResponse doDelete(char *url, char **header, char *);
 extern struct RestResponse doPatch(char *url, char **header, char *);
 extern struct RestResponse doPut(char *url, char **header, char *);
-extern char *  webclient_statusCodeStr(enum STATUS_CODES statusCode);
+extern char *webclient_statusCodeStr(enum STATUS_CODES statusCode);
 
 char *methodNameList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
 methodPtr methodList[] = {&doGet, &doPut, &doPost, &doDelete, &doPatch};
 
+struct RestResponse errorMessageGenerator(CURLcode res, struct RestResponse restData);
 
-char *  webclient_statusCodeStr(enum STATUS_CODES statusCode)
+char *webclient_statusCodeStr(enum STATUS_CODES statusCode)
 {
 
     return STATUS_CODE_STRINGS[statusCode];
@@ -63,9 +63,7 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
         /* check for errors */
         if (res != CURLE_OK)
         {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-            restData.responseBody = "fail";
-            return restData;
+            return errorMessageGenerator(res, restData);
         }
 
         curl_slist_free_all(headerList);
@@ -82,13 +80,13 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
 struct RestResponse doDelete(char *url, char **header, char *body)
 {
 
-    struct RestResponse r={0};
+    struct RestResponse r = {0};
     return r;
 }
 struct RestResponse doPatch(char *url, char **header, char *body)
 {
 
-    struct RestResponse r={0};
+    struct RestResponse r = {0};
     return r;
 }
 
@@ -124,9 +122,7 @@ struct RestResponse doPost(char *url, char **header, char *body)
         /* check for errors */
         if (res != CURLE_OK)
         {
-            fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
-            restData.responseBody = "fail";
-            return restData;
+            return errorMessageGenerator(res, restData);
         }
 
         /* cleanup curl stuff */
@@ -146,10 +142,10 @@ struct RestResponse doGet(char *url, char **header, char *body)
 {
     curl_global_init(CURL_GLOBAL_ALL);
     CURL *curl = curl_easy_init();
+    struct RestResponse restData;
     if (curl)
     {
         CURLcode res;
-        struct RestResponse restData;
 
         restData.url = url;
         restData.responseBody = NULL;
@@ -163,16 +159,11 @@ struct RestResponse doGet(char *url, char **header, char *body)
         log_debug("sub system url execution for %s", url);
         res = curl_easy_perform(curl);
         log_debug("sub system url execution url %s bytes read %d", url, restData.size);
-        struct RestResponse restResults ;
+        struct RestResponse restResults;
         /* check for errors */
         if (res != CURLE_OK)
         {
-                restResults.url = url,
-                restResults.responseBody = restData.responseBody,
-                restResults.size = restData.size,
-                restResults.statusCode = CLIENT_ERROR,
-                restResults.client_message = (char *)curl_easy_strerror(res)
-            ;
+            return errorMessageGenerator(res, restData);
         }
         else
         {
@@ -186,12 +177,36 @@ struct RestResponse doGet(char *url, char **header, char *body)
         /* cleanup curl stuff */
         curl_easy_cleanup(curl);
 
-        // free(restData.responseBody);
-
         /* we are done with libcurl, so clean it up */
         curl_global_cleanup();
 
         return restResults;
     }
+    restData.client_message = "curl_easy_init() failed";
+    restData.statusCode = CLIENT_ERROR;
+    restData.responseBody = "fail";
+    log_error("curl_easy_init() failed for url: %s", url);
     return (struct RestResponse){NULL, NULL, 0};
+}
+
+struct RestResponse errorMessageGenerator(CURLcode res, struct RestResponse restData)
+{
+
+    const char *errString = curl_easy_strerror(res);
+    size_t errorStrLength = strlen(errString) + 10; // 20 is for the "failed: " prefix and null terminator
+    char *errorMessage = malloc(errorStrLength);
+    restData.statusCode = CLIENT_ERROR;
+    if (errorMessage == NULL)
+    {
+        log_error("Memory allocation failed for error message");
+        restData.responseBody = "fail";
+        restData.client_message = "Memory allocation failed";
+        return restData;
+    }
+    memset(errorMessage, '\0', errorStrLength);
+    log_error("curl_easy_perform() failed: %s", errString);
+    asprintf(&errorMessage, "failed: %s", errString);
+    restData.responseBody = "fail";
+    restData.client_message = errorMessage;
+    return restData;
 }
