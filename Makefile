@@ -23,10 +23,6 @@ scratch: src/scratch.c
 	 $(OBJECTS)log.o
 	chmod u+x $(BIN)scratch
 
-foo: foo.c
-	gcc $(CFLAGS) foo.c   \
-	-lmenu -lncurses 
-
 webClientCommon.o: $(SRCDIR)webClientCommon.c
 	gcc $(CFLAGS) -c $(SRCDIR)webClientCommon.c -o $(OBJECTS)webClientCommon.o
 
