@@ -74,7 +74,7 @@ compiled artifacts are in hammock/bin
 
 # NOTES
 gui.c contains main()
-gad.c is a toy program to help diagnose issues
+scratch.c is a toy program to help diagnose issues
 
 test server
 https://httpbin.org/
