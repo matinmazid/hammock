@@ -1,0 +1,5 @@
+.vscode
+objects/*
+bin/*
+hammock.log
+
