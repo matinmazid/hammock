@@ -14,8 +14,8 @@
 #include <curses.h>
 #include <stdio.h>
 #include "log.h"
-// tmp
-#include<time.h>
+#define ACTIVE_WINDOW (activeWindowPtr % 2)
+
 extern void doMenu();
 
 extern struct guiWindow windows[3];
@@ -70,15 +70,15 @@ void appendChar(int newChar, int activeWindowPtr)
 {
 
 	int newStrLen;
-	char *oldPtr = windows[activeWindowPtr % 2].content;
-	newStrLen = strlen(windows[activeWindowPtr % 2].content); 
+	char *oldPtr = windows[ACTIVE_WINDOW].content;
+	newStrLen = strlen(windows[ACTIVE_WINDOW].content); 
 
 	// we are adding wasting 5 bytes here to make sure we dont buffer overrun
 	// I'll fix it later
 	char * newStr = calloc(newStrLen+5, sizeof(char));
 	memset(newStr, '\0', newStrLen + 4); // clear the memory
-	windows[activeWindowPtr % 2].content = memcpy(newStr, oldPtr, newStrLen );
-	windows[activeWindowPtr % 2].content[newStrLen] = (char)newChar;
+	windows[ACTIVE_WINDOW].content = memcpy(newStr, oldPtr, newStrLen );
+	windows[ACTIVE_WINDOW].content[newStrLen] = (char)newChar;
 }
 
 void destroy_win(WINDOW *local_win)
@@ -137,27 +137,27 @@ int main()
 	int activeWindowPtr = 0;
 	int restMethod_ptr = 0;
 	// start us  off by printting out a GET instructions
-	mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", windows[activeWindowPtr % 2].content);
+	mvwprintw(windows[ACTIVE_WINDOW].windowRef, 1, 1, "%s", windows[ACTIVE_WINDOW].content);
 
 	// eventLoop
 	while (true)
 	{
 
-		wclear(windows[activeWindowPtr % 2].windowRef);
-		if (windows[activeWindowPtr % 2].windowRef == windows[URL].windowRef)
+		wclear(windows[ACTIVE_WINDOW].windowRef);
+		if (windows[ACTIVE_WINDOW].windowRef == windows[URL].windowRef)
 		{
-			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s %s", 
+			mvwprintw(windows[ACTIVE_WINDOW].windowRef, 1, 1, "%s %s", 
 				methodNameList[restMethod_ptr % 5], 
-				windows[activeWindowPtr % 2].content);
+				windows[ACTIVE_WINDOW].content);
 		}
 		else
 		{
-			mvwprintw(windows[activeWindowPtr % 2].windowRef, 1, 1, "%s", 
-				windows[activeWindowPtr % 2].content);
+			mvwprintw(windows[ACTIVE_WINDOW].windowRef, 1, 1, "%s", 
+				windows[ACTIVE_WINDOW].content);
 		}
 
-		box(windows[activeWindowPtr % 2].windowRef, 0, 0);
-		wrefresh(windows[activeWindowPtr % 2].windowRef);
+		box(windows[ACTIVE_WINDOW].windowRef, 0, 0);
+		wrefresh(windows[ACTIVE_WINDOW].windowRef);
 
 		ch = getch();
 
@@ -174,7 +174,6 @@ int main()
 			// resize the windows
 			log_debug("Resizing windows");
 			repaintWindows();
-			continue;
 		}
 		else if (ch == CTRL('L'))
 		{ // ctrl L for clear screen
@@ -185,8 +184,8 @@ int main()
 		else if (ch == CTRL('C'))
 		{ // ctrl C for clear screen
 			log_debug("Clearing content");
-			memset(windows[activeWindowPtr % 2].content, '\0', strlen(windows[activeWindowPtr % 2].content));
-			wrefresh(windows[activeWindowPtr % 2].windowRef);
+			memset(windows[ACTIVE_WINDOW].content, '\0', strlen(windows[ACTIVE_WINDOW].content));
+			wrefresh(windows[ACTIVE_WINDOW].windowRef);
 		}
 		else if (ch == CTRL('H'))
 		{ // ctrl H for Headers
@@ -198,13 +197,13 @@ int main()
 			wrefresh(windows[LEFT].windowRef);
 			wrefresh(windows[RIGHT].windowRef);
 		}
-		else if ((ch == KEY_DOWN) && (activeWindowPtr % 2 == URL)) // cycle down
+		else if ((ch == KEY_DOWN) && (ACTIVE_WINDOW == URL)) // cycle down
 		{
 
 			restMethod_ptr++;
-			windows[activeWindowPtr % 2].windowRef = drawUrlBox(windows[URL].windowRef);
+			windows[ACTIVE_WINDOW].windowRef = drawUrlBox(windows[URL].windowRef);
 		}
-		else if ((ch == KEY_UP) && (activeWindowPtr % 2 == URL)) // cycle up
+		else if ((ch == KEY_UP) && (ACTIVE_WINDOW == URL)) // cycle up
 		{
 			// 0 1 2 3 4
 			if (restMethod_ptr == 0)
@@ -217,9 +216,9 @@ int main()
 		}
 		else if (ch==KEY_UP)
 		{
-			// windows[activeWindowPtr % 2].windowRef ;
+			// windows[ACTIVE_WINDOW].windowRef ;
 			// int row=0,col=0;
-			// getyx(windows[activeWindowPtr % 2].windowRef, row, col);
+			// getyx(windows[ACTIVE_WINDOW].windowRef, row, col);
 
 			continue;
 		}
@@ -228,7 +227,7 @@ int main()
 			activeWindowPtr++;
 
 		}
-		else if ((ch == CTRL('e')) || (ch == '\n' && activeWindowPtr % 2 == URL))
+		else if ((ch == CTRL('e')) || (ch == '\n' && ACTIVE_WINDOW == URL))
 		{
 			log_trace("Executing REST call: %s", windows[URL].content);
 			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5,
@@ -240,10 +239,10 @@ int main()
 		}
 		else if (ch == 127) // what is back space? just del
 		{
-			unsigned int existingLength = strlen(windows[activeWindowPtr % 2].content);
+			unsigned int existingLength = strlen(windows[ACTIVE_WINDOW].content);
 			if (existingLength > 0)
 			{
-				windows[activeWindowPtr % 2].content[existingLength - 1] = '\0';	
+				windows[ACTIVE_WINDOW].content[existingLength - 1] = '\0';	
 			}
 		}
 		else

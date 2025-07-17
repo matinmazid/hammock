@@ -1,3 +1,10 @@
+### requireed terminal capbilities
+requires xterm compatibility
+###to run 
+```
+<path/to/executable>/hammock
+```
+
 
 <CTRL-H> select header
 
