@@ -2,8 +2,8 @@ CFLAGS := -g -Wall -fsanitize=address -fsanitize=undefined -fno-omit-frame-point
 SRCDIR := src/
 OBJECTS := objects/
 BIN := bin/
-export CPPFLAGS="-I/opt/homebrew/opt/curl/include"
-export LDFLAGS="-L/opt/homebrew/opt/curl/lib"
+CPPFLAGS := $(shell pkg-config --cflags libcurl)
+LDFLAGS := $(shell pkg-config --libs libcurl)
 
 hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o log.o
 	gcc $(CFLAGS) -g $(SRCDIR)gui.c  -o $(BIN)hammock \
@@ -13,13 +13,6 @@ hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o log.o
 	 $(OBJECTS)log.o \
 	 -lcurl 
 	chmod u+x $(BIN)hammock
-
-# hammock:  $(SRCDIR)gui.c 
-# 	gcc  $(SRCDIR)gui.c -o hammock -L/mnt/c/Users/matin/src/c/ncurses/lib -lncurses -lmenu 
-
-
-run_hammock: hammock
-	./hammock
 
 scratch: src/scratch.c
 	gcc $(CFLAGS)  -g $(SRCDIR)scratch.c -o $(BIN)gad \
