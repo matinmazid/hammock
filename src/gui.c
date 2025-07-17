@@ -168,6 +168,25 @@ int main()
 		{
 			// skip the error and keep going
 			continue;
+			
+		}
+		else if (ch== KEY_RESIZE){
+			// resize the windows
+			log_debug("Resizing windows");
+			repaintWindows();
+			continue;
+		}
+		else if (ch == CTRL('L'))
+		{ // ctrl L for clear screen
+			log_debug("Clearing screen");
+			repaintWindows();
+			continue;
+		}
+		else if (ch == CTRL('C'))
+		{ // ctrl C for clear screen
+			log_debug("Clearing content");
+			memset(windows[activeWindowPtr % 2].content, '\0', strlen(windows[activeWindowPtr % 2].content));
+			wrefresh(windows[activeWindowPtr % 2].windowRef);
 		}
 		else if (ch == CTRL('H'))
 		{ // ctrl H for Headers
@@ -195,6 +214,14 @@ int main()
 			else
 				restMethod_ptr--; // this will cycle through 0-4
 
+		}
+		else if (ch==KEY_UP)
+		{
+			// windows[activeWindowPtr % 2].windowRef ;
+			// int row=0,col=0;
+			// getyx(windows[activeWindowPtr % 2].windowRef, row, col);
+
+			continue;
 		}
 		else if (ch == CTRL('\t')) // switch window
 		{

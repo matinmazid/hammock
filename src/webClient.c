@@ -23,6 +23,8 @@ char *methodNameList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
 methodPtr methodList[] = {&doGet, &doPut, &doPost, &doDelete, &doPatch};
 
 struct RestResponse errorMessageGenerator(CURLcode res, struct RestResponse restData);
+struct RestResponse processResponse(CURLcode res, struct RestResponse restData);
+struct RestResponse initFailureResponse(char *url);
 
 char *webclient_statusCodeStr(enum STATUS_CODES statusCode)
 {
@@ -40,7 +42,6 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
 {
     curl_global_init(CURL_GLOBAL_ALL);
     CURL *curl = curl_easy_init();
-    struct curl_slist *headerList = NULL;
     if (curl)
     {
         CURLcode res;
@@ -48,6 +49,7 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
         restData.url = url;
         restData.responseBody = malloc(1); /* will be grown as needed by the realloc */
         restData.size = 0;                 /* no data at this point */
+        struct curl_slist *headerList = NULL;
         curl_slist_append(headerList, header[0]);
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
@@ -60,11 +62,7 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
         res = curl_easy_perform(curl);
         /* get it! */
 
-        /* check for errors */
-        if (res != CURLE_OK)
-        {
-            return errorMessageGenerator(res, restData);
-        }
+        restData = processResponse(res, restData);
 
         curl_slist_free_all(headerList);
         /* cleanup curl stuff */
@@ -74,7 +72,7 @@ struct RestResponse doPut(char *url, char **header, char *requestBody)
         // there is a memory leak b/c we keep mallocing
         return restData;
     }
-    return (struct RestResponse){NULL, NULL, 0};
+    return initFailureResponse(url);
 }
 
 struct RestResponse doDelete(char *url, char **header, char *body)
@@ -94,14 +92,14 @@ struct RestResponse doPost(char *url, char **header, char *body)
 {
     curl_global_init(CURL_GLOBAL_ALL);
     CURL *curl = curl_easy_init();
-    struct curl_slist *headerList = NULL;
     if (curl)
     {
         CURLcode res;
         struct RestResponse restData;
         restData.url = url;
-        restData.responseBody = malloc(1); /* will be grown as needed by the realloc */
-        restData.size = 0;                 /* no data at this point */
+        restData.responseBody = NULL; /* will be grown as needed by the realloc */
+        restData.size = 0;            /* no data at this point */
+        struct curl_slist *headerList = NULL;
         curl_slist_append(headerList, header[0]);
         curl_easy_setopt(curl, CURLOPT_URL, url);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
@@ -119,12 +117,7 @@ struct RestResponse doPost(char *url, char **header, char *body)
         res = curl_easy_perform(curl);
         /* get it! */
 
-        /* check for errors */
-        if (res != CURLE_OK)
-        {
-            return errorMessageGenerator(res, restData);
-        }
-
+        restData = processResponse(res, restData);
         /* cleanup curl stuff */
         curl_easy_cleanup(curl);
 
@@ -132,10 +125,9 @@ struct RestResponse doPost(char *url, char **header, char *body)
         curl_global_cleanup();
 
         curl_slist_free_all(headerList);
-        // there is a memory leak b/c we keep mallocing
         return restData;
     }
-    return (struct RestResponse){NULL, NULL, 0};
+    return initFailureResponse(url);
 }
 
 struct RestResponse doGet(char *url, char **header, char *body)
@@ -159,20 +151,8 @@ struct RestResponse doGet(char *url, char **header, char *body)
         log_debug("sub system url execution for %s", url);
         res = curl_easy_perform(curl);
         log_debug("sub system url execution url %s bytes read %d", url, restData.size);
-        struct RestResponse restResults;
-        /* check for errors */
-        if (res != CURLE_OK)
-        {
-            return errorMessageGenerator(res, restData);
-        }
-        else
-        {
-            restResults.url = url;
-            restResults.responseBody = restData.responseBody;
-            restResults.size = restData.size;
-            restResults.statusCode = CLIENT_SUCCESS;
-            restResults.client_message = webclient_statusCodeStr(CLIENT_SUCCESS);
-        }
+
+        restData = processResponse(res, restData);
 
         /* cleanup curl stuff */
         curl_easy_cleanup(curl);
@@ -180,13 +160,34 @@ struct RestResponse doGet(char *url, char **header, char *body)
         /* we are done with libcurl, so clean it up */
         curl_global_cleanup();
 
-        return restResults;
+        return restData;
     }
-    restData.client_message = "curl_easy_init() failed";
+    return initFailureResponse(url);
+}
+
+struct RestResponse processResponse(CURLcode res, struct RestResponse restData)
+{
+    if (res == CURLE_OK)
+    {
+        restData.statusCode = CLIENT_SUCCESS;
+        restData.client_message = webclient_statusCodeStr(CLIENT_SUCCESS);
+    }
+    else
+    {
+        return errorMessageGenerator(res, restData);
+    }
+    return restData;
+}
+
+struct RestResponse initFailureResponse(char *url)
+{
+    struct RestResponse restData;
+    restData.url = url;
+    restData.responseBody = NULL;
+    restData.size = 0;
     restData.statusCode = CLIENT_ERROR;
-    restData.responseBody = "fail";
-    log_error("curl_easy_init() failed for url: %s", url);
-    return (struct RestResponse){NULL, NULL, 0};
+    restData.client_message = "Initialization failed";
+    return restData;
 }
 
 struct RestResponse errorMessageGenerator(CURLcode res, struct RestResponse restData)
