@@ -13,18 +13,19 @@
 /**************** STRUCTS *****************/
 struct guiWindow
 {
-	WINDOW *windowRef;
+	WINDOW *boarderWindowRef;
+	WINDOW *textWindowRef;
 	char *content;
 };
 
+/**************** GLOBALS *****************/
+// used to point to the active window
 enum WINDOWS
 {
 	URL,
 	LEFT,
 	RIGHT
 };
-
-/**************** GLOBALS *****************/
 
 struct guiWindow windows[3];
 #endif

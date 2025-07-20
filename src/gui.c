@@ -11,58 +11,91 @@
 #include <curl/curl.h>
 #include <menu.h>
 #include "menu.h"
+#include <errno.h>
 #include <curses.h>
 #include <stdio.h>
 #include "log.h"
-#define ACTIVE_WINDOW (activeWindowPtr % 2)
+#define ACTIVE_WINDOW (activeWindowPtr % 3)
 
 extern void doMenu();
 
 extern struct guiWindow windows[3];
+
+
+	static int activeWindowPtr = 0;
+	static int restMethod_ptr = 0;
 void destroy_win(WINDOW *local_win);
 
 /**************** FUNCTIONS *****************/
 
-WINDOW *drawRightWindow(WINDOW *windowPtr)
+WINDOW *drawRightWindow()
 {
-
-	destroy_win(windowPtr);
+	int y=0,x=0;
+	destroy_win(windows[RIGHT].boarderWindowRef);
 	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, COLS / 2);
+	getmaxyx(windowsPtr, y, x);
+	log_debug("Right window dimensions, y=%d, x=%d", y, x);
 	box(windowsPtr, 0, 0);
-	wrefresh(windowsPtr);
-
 	return windowsPtr;
 }
 
-WINDOW *drawUrlBox(WINDOW *windowPtr)
+WINDOW *drawUrlBox()
 {
 
-	destroy_win(windowPtr);
+	int y=0,x=0;
+	destroy_win(windows[URL].boarderWindowRef);
 	WINDOW *windowsPtr = newwin(3, COLS, 0, 0);
+	getmaxyx(windowsPtr, y, x);
+	log_debug("url window dimensions, y=%d, x=%d", y, x);
 	box(windowsPtr, 0, 0);
-	wrefresh(windowsPtr);
-
 	return windowsPtr;
 }
 
-WINDOW *drawLeftWindow(WINDOW *windowPtr)
+WINDOW *drawLeftWindow()
 {
 
-	destroy_win(windowPtr);
+	int y=0,x=0;
+	destroy_win(windows[LEFT].boarderWindowRef);
 	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, 0);
+	getmaxyx(windowsPtr, y, x);
+	log_debug("left window dimensions, y=%d, x=%d", y, x);
 	box(windowsPtr, 0, 0);
-	wrefresh(windowsPtr);
-
 	return windowsPtr;
+}
+
+WINDOW * createChildWindow(WINDOW *parent)
+{
+	int y=0,x=0;
+	getmaxyx(parent, y, x);
+	WINDOW *child = derwin(parent, y-1, y-1, 1, 1);
+	if (child == NULL)
+	{
+		log_error("Error creating child window: %s", strerror(errno));
+		return NULL;
+	}
+	getmaxyx(child, y, x);
+	log_debug("child dim , y=%d, x=%d", y, x);
+	return child;
 }
 
 void repaintWindows(void)
 {
+	
+	windows[RIGHT].boarderWindowRef = drawRightWindow();
+	windows[RIGHT].textWindowRef =createChildWindow(windows[RIGHT].boarderWindowRef);
+	wnoutrefresh(windows[RIGHT].boarderWindowRef);
+	wnoutrefresh(windows[RIGHT].textWindowRef);
 
-	windows[RIGHT].windowRef = drawRightWindow(windows[RIGHT].windowRef);
-	windows[LEFT].windowRef = drawLeftWindow(windows[LEFT].windowRef);
-	windows[URL].windowRef = drawUrlBox(windows[URL].windowRef);
+	windows[LEFT].boarderWindowRef = drawLeftWindow();
+	windows[LEFT].textWindowRef=createChildWindow(windows[LEFT].boarderWindowRef);
+	wnoutrefresh(windows[LEFT].boarderWindowRef);
+	wnoutrefresh(windows[LEFT].textWindowRef);
 
+	windows[URL].boarderWindowRef = drawUrlBox();
+	windows[URL].textWindowRef = windows[URL].boarderWindowRef;
+	wnoutrefresh(windows[URL].boarderWindowRef);
+
+	doupdate(); // refresh the screen with the new windows
 	return;
 }
 
@@ -79,6 +112,7 @@ void appendChar(int newChar, int activeWindowPtr)
 	memset(newStr, '\0', newStrLen + 4); // clear the memory
 	windows[ACTIVE_WINDOW].content = memcpy(newStr, oldPtr, newStrLen );
 	windows[ACTIVE_WINDOW].content[newStrLen] = (char)newChar;
+	free(oldPtr); // free the old pointer
 }
 
 void destroy_win(WINDOW *local_win)
@@ -103,6 +137,7 @@ void destroy_win(WINDOW *local_win)
 	delwin(local_win);
 }
 
+
 /****************************** MAIN **********************/
 int main()
 {
@@ -118,47 +153,48 @@ int main()
 	if (logFile != NULL)
 		log_add_fp(logFile,LOG_DEBUG);
 
-	refresh();
-	windows[RIGHT].windowRef = NULL;
-	windows[LEFT].windowRef = NULL;
-	windows[URL].windowRef = NULL;
+	log_set_quiet(true); // set quiet mode to true, so we don't print to stdout
 
 	// create a valid pointer
 	windows[RIGHT].content = calloc(0, sizeof(char));
 	windows[LEFT].content = calloc(2, sizeof(char));
 	windows[URL].content = calloc(2, sizeof(char));
+	refresh();
 	// draw the initial window
 	repaintWindows();
 
-	scrollok(windows[RIGHT].windowRef, true);
-	scrollok(windows[LEFT].windowRef, true);
-	scrollok(windows[URL].windowRef, true);
+	scrollok(windows[RIGHT].boarderWindowRef, true);
+	scrollok(windows[LEFT].boarderWindowRef, true);
+	scrollok(windows[URL].boarderWindowRef, true);
 
-	int activeWindowPtr = 0;
-	int restMethod_ptr = 0;
+	// int activeWindowPtr = 0;
+	// int restMethod_ptr = 0;
 	// start us  off by printting out a GET instructions
-	mvwprintw(windows[ACTIVE_WINDOW].windowRef, 1, 1, "%s", windows[ACTIVE_WINDOW].content);
+	mvwprintw(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 1, "%s", windows[ACTIVE_WINDOW].content);
 
+	// log current dimenions
+	log_debug("Current terminal dimensions, y=%d, x=%d", LINES, COLS);
 	// eventLoop
 	while (true)
 	{
 
-		wclear(windows[ACTIVE_WINDOW].windowRef);
-		if (windows[ACTIVE_WINDOW].windowRef == windows[URL].windowRef)
+		wclear(windows[ACTIVE_WINDOW].boarderWindowRef);
+		repaintWindows();
+		if (windows[ACTIVE_WINDOW].boarderWindowRef == windows[URL].boarderWindowRef)
 		{
-			mvwprintw(windows[ACTIVE_WINDOW].windowRef, 1, 1, "%s %s", 
+			mvwprintw(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 1, "%s %s", 
 				methodNameList[restMethod_ptr % 5], 
 				windows[ACTIVE_WINDOW].content);
 		}
 		else
 		{
-			mvwprintw(windows[ACTIVE_WINDOW].windowRef, 1, 1, "%s", 
+			mvwprintw(windows[ACTIVE_WINDOW].textWindowRef, 1, 1, "%s", 
 				windows[ACTIVE_WINDOW].content);
 		}
 
-		box(windows[ACTIVE_WINDOW].windowRef, 0, 0);
-		wrefresh(windows[ACTIVE_WINDOW].windowRef);
-
+		box(windows[ACTIVE_WINDOW].boarderWindowRef, 0, 0);
+		// touchwin(windows[ACTIVE_WINDOW].boarderWindowRef);
+		wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
 		ch = getch();
 
 		if (ch == CTRL('Q'))
@@ -166,6 +202,7 @@ int main()
 			break;
 		else if (ch == ERR)
 		{
+			log_error("Error reading input: %s", strerror(errno));
 			// skip the error and keep going
 			continue;
 			
@@ -185,23 +222,22 @@ int main()
 		{ // ctrl C for clear screen
 			log_debug("Clearing content");
 			memset(windows[ACTIVE_WINDOW].content, '\0', strlen(windows[ACTIVE_WINDOW].content));
-			wrefresh(windows[ACTIVE_WINDOW].windowRef);
+			wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
 		}
 		else if (ch == CTRL('H'))
 		{ // ctrl H for Headers
 
 			doMenu();
 			// post_menu(headerMenu);
-			box(windows[LEFT].windowRef, 0, 0);
-			box(windows[RIGHT].windowRef, 0, 0);
-			wrefresh(windows[LEFT].windowRef);
-			wrefresh(windows[RIGHT].windowRef);
+			box(windows[LEFT].boarderWindowRef, 0, 0);
+			box(windows[RIGHT].boarderWindowRef, 0, 0);
+			wrefresh(windows[LEFT].boarderWindowRef);
+			wrefresh(windows[RIGHT].boarderWindowRef);
 		}
 		else if ((ch == KEY_DOWN) && (ACTIVE_WINDOW == URL)) // cycle down
 		{
-
 			restMethod_ptr++;
-			windows[ACTIVE_WINDOW].windowRef = drawUrlBox(windows[URL].windowRef);
+			windows[ACTIVE_WINDOW].boarderWindowRef = drawUrlBox();
 		}
 		else if ((ch == KEY_UP) && (ACTIVE_WINDOW == URL)) // cycle up
 		{
@@ -214,11 +250,11 @@ int main()
 				restMethod_ptr--; // this will cycle through 0-4
 
 		}
-		else if (ch==KEY_UP)
+		else if (ch==KEY_UP && ACTIVE_WINDOW==RIGHT)
 		{
-			// windows[ACTIVE_WINDOW].windowRef ;
+			// windows[ACTIVE_WINDOW].boarderWindowRef ;
 			// int row=0,col=0;
-			// getyx(windows[ACTIVE_WINDOW].windowRef, row, col);
+			// getyx(windows[ACTIVE_WINDOW].boarderWindowRef, row, col);
 
 			continue;
 		}
@@ -232,10 +268,13 @@ int main()
 			log_trace("Executing REST call: %s", windows[URL].content);
 			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5,
 					ContentTypes, windows[LEFT].content);
-			
+		
+			windows[RIGHT].content=restResult.responseBody;
 			log_trace("REST call executed: %s", restResult.responseBody);
-			mvwprintw(windows[RIGHT].windowRef, 1, 2, "%s  ", restResult.responseBody );
-			wrefresh(windows[RIGHT].windowRef);
+			windows[RIGHT].content=restResult.responseBody; 
+			mvwprintw(windows[RIGHT].textWindowRef, 1, 2, "%s ", windows[RIGHT].content );
+			wrefresh(windows[RIGHT].textWindowRef);
+		
 		}
 		else if (ch == 127) // what is back space? just del
 		{
@@ -254,6 +293,10 @@ int main()
 				appendChar(ch, activeWindowPtr);
 			}
 		}
+
+		int x=0,y=0;
+		getyx(windows[ACTIVE_WINDOW].boarderWindowRef, y, x);
+		log_debug("Current active window co ord , y=%d, x=%d char=%c",x,y,(char)ch);
 	}
 
 	endwin(); /* End curses mode		  */
