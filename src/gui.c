@@ -94,8 +94,8 @@ void repaintWindows(void)
 	// -- LEFT window
 	windows[LEFT].boarderWindowRef = drawLeftWindow();
 	windows[LEFT].textWindowRef=createChildWindow(windows[LEFT].boarderWindowRef);
-	mvwprintw(windows[ACTIVE_WINDOW].textWindowRef, 1, 1, "%s", 
-		windows[ACTIVE_WINDOW].content);
+	mvwprintw(windows[LEFT].textWindowRef, 1, 1, "%s", 
+		windows[LEFT].content);
 
 	wnoutrefresh(windows[LEFT].boarderWindowRef);
 	wnoutrefresh(windows[LEFT].textWindowRef);
@@ -191,7 +191,6 @@ int main()
 	{
 
 		wclear(windows[ACTIVE_WINDOW].boarderWindowRef);
-		repaintWindows();
 		if (windows[ACTIVE_WINDOW].boarderWindowRef == windows[URL].boarderWindowRef)
 		{
 			mvwprintw(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 1, "%s %s", 
@@ -204,9 +203,8 @@ int main()
 				windows[ACTIVE_WINDOW].content);
 		}
 
-		// box(windows[ACTIVE_WINDOW].boarderWindowRef, 0, 0);
-		// touchwin(windows[ACTIVE_WINDOW].boarderWindowRef);
-		wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
+		repaintWindows();
+		wrefresh(windows[ACTIVE_WINDOW].textWindowRef);
 		ch = getch();
 
 		if (ch == CTRL('Q'))
