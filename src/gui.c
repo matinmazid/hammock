@@ -67,7 +67,9 @@ WINDOW * createChildWindow(WINDOW *parent)
 {
 	int y=0,x=0;
 	getmaxyx(parent, y, x);
-	WINDOW *child = derwin(parent, y-1, y-1, 1, 1);
+	log_debug("parent dim , y=%d, x=%d", y, x);
+
+	WINDOW *child = derwin(parent, y-2, x-2, 1, 1);
 	if (child == NULL)
 	{
 		log_error("Error creating child window: %s", strerror(errno));
@@ -80,19 +82,29 @@ WINDOW * createChildWindow(WINDOW *parent)
 
 void repaintWindows(void)
 {
-	
+
+	// -- RIGHT window
 	windows[RIGHT].boarderWindowRef = drawRightWindow();
 	windows[RIGHT].textWindowRef =createChildWindow(windows[RIGHT].boarderWindowRef);
+	mvwprintw(windows[RIGHT].textWindowRef, 1, 1, "%s", 
+		windows[RIGHT].content);
 	wnoutrefresh(windows[RIGHT].boarderWindowRef);
 	wnoutrefresh(windows[RIGHT].textWindowRef);
 
+	// -- LEFT window
 	windows[LEFT].boarderWindowRef = drawLeftWindow();
 	windows[LEFT].textWindowRef=createChildWindow(windows[LEFT].boarderWindowRef);
+	mvwprintw(windows[ACTIVE_WINDOW].textWindowRef, 1, 1, "%s", 
+		windows[ACTIVE_WINDOW].content);
+
 	wnoutrefresh(windows[LEFT].boarderWindowRef);
 	wnoutrefresh(windows[LEFT].textWindowRef);
 
+	// -- URL window
 	windows[URL].boarderWindowRef = drawUrlBox();
-	windows[URL].textWindowRef = windows[URL].boarderWindowRef;
+	mvwprintw(windows[URL].boarderWindowRef, 1, 1, "%s %s", 
+		methodNameList[restMethod_ptr % 5], 
+		windows[URL].content);
 	wnoutrefresh(windows[URL].boarderWindowRef);
 
 	doupdate(); // refresh the screen with the new windows
@@ -192,7 +204,7 @@ int main()
 				windows[ACTIVE_WINDOW].content);
 		}
 
-		box(windows[ACTIVE_WINDOW].boarderWindowRef, 0, 0);
+		// box(windows[ACTIVE_WINDOW].boarderWindowRef, 0, 0);
 		// touchwin(windows[ACTIVE_WINDOW].boarderWindowRef);
 		wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
 		ch = getch();
