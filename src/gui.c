@@ -80,7 +80,7 @@ WINDOW * createChildWindow(WINDOW *parent)
 	return child;
 }
 
-void repaintWindows(void)
+void redrawWindows(void)
 {
 
 	// -- RIGHT window
@@ -173,7 +173,7 @@ int main()
 	windows[URL].content = calloc(2, sizeof(char));
 	refresh();
 	// draw the initial window
-	repaintWindows();
+	redrawWindows();
 
 	scrollok(windows[RIGHT].boarderWindowRef, true);
 	scrollok(windows[LEFT].boarderWindowRef, true);
@@ -203,7 +203,7 @@ int main()
 				windows[ACTIVE_WINDOW].content);
 		}
 
-		repaintWindows();
+		redrawWindows();
 		wrefresh(windows[ACTIVE_WINDOW].textWindowRef);
 		ch = getch();
 
@@ -220,12 +220,12 @@ int main()
 		else if (ch== KEY_RESIZE){
 			// resize the windows
 			log_debug("Resizing windows");
-			repaintWindows();
+			redrawWindows();
 		}
 		else if (ch == CTRL('L'))
 		{ // ctrl L for clear screen
 			log_debug("Clearing screen");
-			repaintWindows();
+			redrawWindows();
 			continue;
 		}
 		else if (ch == CTRL('C'))
