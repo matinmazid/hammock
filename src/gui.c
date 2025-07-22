@@ -63,7 +63,7 @@ WINDOW *drawLeftWindow()
 	return windowsPtr;
 }
 
-WINDOW * createChildWindow(WINDOW *parent)
+WINDOW * drawChildWindow(WINDOW *parent)
 {
 	int y=0,x=0;
 	getmaxyx(parent, y, x);
@@ -85,7 +85,7 @@ void redrawWindows(void)
 
 	// -- RIGHT window
 	windows[RIGHT].boarderWindowRef = drawRightWindow();
-	windows[RIGHT].textWindowRef =createChildWindow(windows[RIGHT].boarderWindowRef);
+	windows[RIGHT].textWindowRef =drawChildWindow(windows[RIGHT].boarderWindowRef);
 	mvwprintw(windows[RIGHT].textWindowRef, 1, 1, "%s", 
 		windows[RIGHT].content);
 	wnoutrefresh(windows[RIGHT].boarderWindowRef);
@@ -93,7 +93,7 @@ void redrawWindows(void)
 
 	// -- LEFT window
 	windows[LEFT].boarderWindowRef = drawLeftWindow();
-	windows[LEFT].textWindowRef=createChildWindow(windows[LEFT].boarderWindowRef);
+	windows[LEFT].textWindowRef=drawChildWindow(windows[LEFT].boarderWindowRef);
 	mvwprintw(windows[LEFT].textWindowRef, 1, 1, "%s", 
 		windows[LEFT].content);
 
