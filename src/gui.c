@@ -63,13 +63,14 @@ WINDOW *drawLeftWindow()
 	return windowsPtr;
 }
 
-WINDOW * drawChildWindow(WINDOW *parent)
+// WINDOW * drawChildWindow(WINDOW *parent)
+WINDOW* drawChildWindow(struct guiWindow parent)
 {
 	int y=0,x=0;
-	getmaxyx(parent, y, x);
+	getmaxyx(parent.boarderWindowRef, y, x);
 	log_debug("parent dim , y=%d, x=%d", y, x);
 
-	WINDOW *child = derwin(parent, y-2, x-2, 1, 1);
+	WINDOW *child = derwin(parent.boarderWindowRef, y-2, x-2, 1, 1);
 	if (child == NULL)
 	{
 		log_error("Error creating child window: %s", strerror(errno));
@@ -85,7 +86,7 @@ void redrawWindows(void)
 
 	// -- RIGHT window
 	windows[RIGHT].boarderWindowRef = drawRightWindow();
-	windows[RIGHT].textWindowRef =drawChildWindow(windows[RIGHT].boarderWindowRef);
+	windows[RIGHT].textWindowRef =drawChildWindow(windows[RIGHT]);
 	mvwprintw(windows[RIGHT].textWindowRef, 1, 1, "%s", 
 		windows[RIGHT].content);
 	wnoutrefresh(windows[RIGHT].boarderWindowRef);
@@ -93,7 +94,7 @@ void redrawWindows(void)
 
 	// -- LEFT window
 	windows[LEFT].boarderWindowRef = drawLeftWindow();
-	windows[LEFT].textWindowRef=drawChildWindow(windows[LEFT].boarderWindowRef);
+	windows[LEFT].textWindowRef=drawChildWindow(windows[LEFT]);
 	mvwprintw(windows[LEFT].textWindowRef, 1, 1, "%s", 
 		windows[LEFT].content);
 
