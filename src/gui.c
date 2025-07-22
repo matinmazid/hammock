@@ -205,9 +205,10 @@ int main()
 		}
 
 		redrawWindows();
-		wrefresh(windows[ACTIVE_WINDOW].textWindowRef);
-		ch = getch();
+		// moves cursor to the active window
+		wrefresh(windows[ACTIVE_WINDOW].textWindowRef); 
 
+		ch = getch();
 		if (ch == CTRL('Q'))
 			// exit the program loop
 			break;
@@ -263,10 +264,9 @@ int main()
 		}
 		else if (ch==KEY_UP && ACTIVE_WINDOW==RIGHT)
 		{
-			// windows[ACTIVE_WINDOW].boarderWindowRef ;
-			// int row=0,col=0;
-			// getyx(windows[ACTIVE_WINDOW].boarderWindowRef, row, col);
-
+			// scroll up the right window
+			scroll(windows[RIGHT].textWindowRef);
+			wrefresh(windows[RIGHT].textWindowRef);
 			continue;
 		}
 		else if (ch == CTRL('\t')) // switch window
@@ -306,8 +306,14 @@ int main()
 		}
 
 		int x=0,y=0;
-		getyx(windows[ACTIVE_WINDOW].boarderWindowRef, y, x);
-		log_debug("Current active window co ord , y=%d, x=%d char=%c",x,y,(char)ch);
+
+		// debug lines only 
+		getyx(windows[URL].boarderWindowRef, y, x);
+		log_debug("Current url window co ord , y=%d, x=%d char=[%c]",x,y,(char)ch);
+		getyx(windows[LEFT].textWindowRef, y, x);
+		log_debug("Current left window co ord , y=%d, x=%d char=[%c]",x,y,(char)ch);
+		getyx(windows[RIGHT].textWindowRef, y, x);
+		log_debug("Current right window co ord , y=%d, x=%d char=[%c]",x,y,(char)ch);
 	}
 
 	endwin(); /* End curses mode		  */
