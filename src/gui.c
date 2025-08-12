@@ -39,61 +39,68 @@ WINDOW *drawRightWindow()
 	return windowsPtr;
 }
 
-WINDOW *drawUrlBox()
+
+WINDOW *drawWindow(int yStart, int xStart,int numLines, int numCols	)
 {
 
 	int y=0,x=0;
-	destroy_win(windows[URL].boarderWindowRef);
-	WINDOW *windowsPtr = newwin(3, COLS, 0, 0);
-	getmaxyx(windowsPtr, y, x);
-	log_debug("url window dimensions, y=%d, x=%d", y, x);
+
+	log_debug("creating new window");
+	WINDOW *windowsPtr = newwin(numLines, numCols, yStart, xStart);
+	log_debug("drawing box");
 	box(windowsPtr, 0, 0);
 	return windowsPtr;
 }
 
-WINDOW *drawLeftWindow()
-{
-
-	int y=0,x=0;
-	destroy_win(windows[LEFT].boarderWindowRef);
-	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, 0);
-	getmaxyx(windowsPtr, y, x);
-	log_debug("left window dimensions, y=%d, x=%d", y, x);
-	box(windowsPtr, 0, 0);
-	return windowsPtr;
-}
-
-// WINDOW * drawChildWindow(WINDOW *parent)
 WINDOW* drawChildWindow(struct guiWindow parent)
 {
-	int y=0,x=0;
-	getmaxyx(parent.boarderWindowRef, y, x);
-	log_debug("parent dim , y=%d, x=%d", y, x);
+	int windowYPos=0,windowXPos=0;
+	getbegyx(parent.boarderWindowRef, windowYPos, windowXPos);
 
-	WINDOW *child = derwin(parent.boarderWindowRef, y-2, x-2, 1, 1);
+	int padWindowYPos=0,padWindowXPos=0;
+	getmaxyx(parent.boarderWindowRef, windowYPos, windowXPos);
+
+	log_debug("child widow - parent pos , y=%d, x=%d", windowYPos, windowXPos);
+
+	getbegyx(parent.boarderWindowRef, padWindowYPos, padWindowXPos);
+	log_debug("child - parent position co ord , y=%d, x=%d", padWindowYPos, padWindowXPos);
+	// WINDOW *child = derwin(parent.boarderWindowRef, windowY-2, windowX-2, 1, 1);
+	WINDOW *child = newpad( padWindowYPos-2, padWindowYPos);
 	if (child == NULL)
 	{
 		log_error("Error creating child window: %s", strerror(errno));
 		return NULL;
 	}
-	getmaxyx(child, y, x);
-	log_debug("child dim , y=%d, x=%d", y, x);
+	// getmaxyx(child, windowY, windowX);
+	// log_debug("child dim , y=%d, x=%d", windowY, windowX);
+
 	return child;
 }
 
 void redrawWindows(void)
 {
 
-	// -- RIGHT window
-	windows[RIGHT].boarderWindowRef = drawRightWindow();
-	windows[RIGHT].textWindowRef =drawChildWindow(windows[RIGHT]);
-	mvwprintw(windows[RIGHT].textWindowRef, 1, 1, "%s", 
-		windows[RIGHT].content);
-	wnoutrefresh(windows[RIGHT].boarderWindowRef);
-	wnoutrefresh(windows[RIGHT].textWindowRef);
+	log_debug("term windows dim, lines=%d, cols=%d", LINES , COLS );
 
+	// -- URL window
+	log_debug("draw url window");
+	// windows[URL].boarderWindowRef = drawUrlBox();
+	windows[URL].boarderWindowRef = drawWindow(0, 0, 3, COLS);
+	mvwprintw(windows[URL].boarderWindowRef, 1, 1, "%s %s", 
+		methodNameList[restMethod_ptr % 5], 
+		windows[URL].content);
+	wnoutrefresh(windows[URL].boarderWindowRef);
+
+	// -- RIGHT window
+	log_debug("draw right windows");
+	windows[RIGHT].boarderWindowRef= drawWindow(3, COLS / 2, LINES - 3, COLS / 2);
+	windows[RIGHT].textWindowRef=drawChildWindow(windows[RIGHT]);
+	wnoutrefresh(windows[RIGHT].boarderWindowRef);
+	// wnoutrefresh(windows[RIGHT].textWindowRef);
+
+	log_debug("draw left window");
 	// -- LEFT window
-	windows[LEFT].boarderWindowRef = drawLeftWindow();
+	windows[LEFT].boarderWindowRef = drawWindow(3,0,LINES - 3,COLS / 2);
 	windows[LEFT].textWindowRef=drawChildWindow(windows[LEFT]);
 	mvwprintw(windows[LEFT].textWindowRef, 1, 1, "%s", 
 		windows[LEFT].content);
@@ -101,12 +108,6 @@ void redrawWindows(void)
 	wnoutrefresh(windows[LEFT].boarderWindowRef);
 	wnoutrefresh(windows[LEFT].textWindowRef);
 
-	// -- URL window
-	windows[URL].boarderWindowRef = drawUrlBox();
-	mvwprintw(windows[URL].boarderWindowRef, 1, 1, "%s %s", 
-		methodNameList[restMethod_ptr % 5], 
-		windows[URL].content);
-	wnoutrefresh(windows[URL].boarderWindowRef);
 
 	doupdate(); // refresh the screen with the new windows
 	return;
@@ -156,10 +157,10 @@ int main()
 {
 	// set up logging
 	int ch;
-	initscr(); /* Start curses mode 		*/
+	initscr(); /* start curses mode 		*/
 	raw();
 	noecho();
-	keypad(stdscr, TRUE); /* I need that nifty F1 	*/
+	keypad(stdscr, true); /* i need that nifty f1 	*/
 
 	// set logging
 	FILE *logFile = fopen("hammock.log", "a");
@@ -249,7 +250,7 @@ int main()
 		else if ((ch == KEY_DOWN) && (ACTIVE_WINDOW == URL)) // cycle down
 		{
 			restMethod_ptr++;
-			windows[ACTIVE_WINDOW].boarderWindowRef = drawUrlBox();
+			windows[ACTIVE_WINDOW].boarderWindowRef = drawWindow(0, 0, 3, COLS);
 		}
 		else if ((ch == KEY_UP) && (ACTIVE_WINDOW == URL)) // cycle up
 		{
@@ -265,7 +266,9 @@ int main()
 		else if (ch==KEY_UP && ACTIVE_WINDOW==RIGHT)
 		{
 			// scroll up the right window
-			scroll(windows[RIGHT].textWindowRef);
+			int scrollRtn=scroll(windows[RIGHT].textWindowRef);
+
+			log_debug("Scrolling up the right window rtn= %d",scrollRtn);
 			wrefresh(windows[RIGHT].textWindowRef);
 			continue;
 		}
