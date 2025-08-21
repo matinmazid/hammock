@@ -186,8 +186,6 @@ int main()
 	// start us  off by printting out a GET instructions
 	mvwprintw(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 1, "%s", windows[ACTIVE_WINDOW].content);
 
-	// log current dimenions
-	log_debug("Current terminal dimensions, y=%d, x=%d", LINES, COLS);
 	// eventLoop
 	while (true)
 	{
