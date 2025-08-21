@@ -2,4 +2,4 @@
 objects/*
 bin/*
 hammock.log
-
+**.swp

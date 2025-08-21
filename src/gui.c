@@ -54,33 +54,37 @@ WINDOW *drawWindow(int yStart, int xStart,int numLines, int numCols	)
 
 WINDOW* drawChildWindow(struct guiWindow parent)
 {
-	int windowYPos=0,windowXPos=0;
+	int windowYPos=0,windowXPos=0,windowsXsize=0,windowsYsize=0;
 	getbegyx(parent.boarderWindowRef, windowYPos, windowXPos);
+	log_debug("child widow - parent pos  y=%d, x=%d", windowYPos, windowXPos);
 
-	int padWindowYPos=0,padWindowXPos=0;
-	getmaxyx(parent.boarderWindowRef, windowYPos, windowXPos);
+	getmaxyx(parent.boarderWindowRef, windowsYsize, windowsXsize);
+	log_debug("child widow - parent size  y=%d, x=%d", windowsYsize, windowsXsize);
 
-	log_debug("child widow - parent pos , y=%d, x=%d", windowYPos, windowXPos);
+	// caclucate the max width of a child window
+	int childWidth	= windowsXsize - 2; // -2 for the border
 
-	getbegyx(parent.boarderWindowRef, padWindowYPos, padWindowXPos);
-	log_debug("child - parent position co ord , y=%d, x=%d", padWindowYPos, padWindowXPos);
-	// WINDOW *child = derwin(parent.boarderWindowRef, windowY-2, windowX-2, 1, 1);
-	WINDOW *child = newpad( padWindowYPos-2, padWindowYPos);
+	// TODO: make this dynamic
+	parent.content="some content to display in the child window";
+	int lengthOfContent = strlen(parent.content);
+	int numberOfLines = lengthOfContent / childWidth + 3; // +1 for the last line
+	WINDOW *child = newpad(numberOfLines, childWidth);
 	if (child == NULL)
 	{
 		log_error("Error creating child window: %s", strerror(errno));
 		return NULL;
 	}
-	// getmaxyx(child, windowY, windowX);
-	// log_debug("child dim , y=%d, x=%d", windowY, windowX);
-
+//TODO: check windowXPos it not right it too right
+	wprintw(child, "%s", parent.content);
+	prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1, 
+		windowYPos + numberOfLines - 1, windowXPos + childWidth - 1);
 	return child;
 }
 
 void redrawWindows(void)
 {
 
-	log_debug("term windows dim, lines=%d, cols=%d", LINES , COLS );
+	log_debug("term windows dim lines=%d, cols=%d", LINES , COLS );
 
 	// -- URL window
 	log_debug("draw url window");
@@ -94,19 +98,18 @@ void redrawWindows(void)
 	// -- RIGHT window
 	log_debug("draw right windows");
 	windows[RIGHT].boarderWindowRef= drawWindow(3, COLS / 2, LINES - 3, COLS / 2);
-	windows[RIGHT].textWindowRef=drawChildWindow(windows[RIGHT]);
 	wnoutrefresh(windows[RIGHT].boarderWindowRef);
+	windows[RIGHT].textWindowRef=drawChildWindow(windows[RIGHT]);
 	// wnoutrefresh(windows[RIGHT].textWindowRef);
 
 	log_debug("draw left window");
 	// -- LEFT window
 	windows[LEFT].boarderWindowRef = drawWindow(3,0,LINES - 3,COLS / 2);
+	wnoutrefresh(windows[LEFT].boarderWindowRef);
 	windows[LEFT].textWindowRef=drawChildWindow(windows[LEFT]);
 	mvwprintw(windows[LEFT].textWindowRef, 1, 1, "%s", 
 		windows[LEFT].content);
 
-	wnoutrefresh(windows[LEFT].boarderWindowRef);
-	wnoutrefresh(windows[LEFT].textWindowRef);
 
 
 	doupdate(); // refresh the screen with the new windows
