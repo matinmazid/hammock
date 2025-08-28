@@ -21,9 +21,8 @@ extern void doMenu();
 
 extern struct guiWindow windows[3];
 
-
-	static int activeWindowPtr = 0;
-	static int restMethod_ptr = 0;
+static int activeWindowPtr = 0;
+static int restMethod_ptr = 0;
 void destroy_win(WINDOW *local_win);
 
 /**************** FUNCTIONS *****************/
@@ -64,53 +63,55 @@ WINDOW* drawChildWindow(struct guiWindow parent)
 	// caclucate the max width of a child window
 	int childWidth	= windowsXsize - 2; // -2 for the border
 
-	// TODO: make this dynamic
-	parent.content="some content to display in the child window";
 	int lengthOfContent = strlen(parent.content);
 	int numberOfLines = lengthOfContent / childWidth + 3; // +1 for the last line
 	WINDOW *child = newpad(numberOfLines, childWidth);
+
+	if (parent.textWindowRef!= NULL)
+	{
+		destroy_win(parent.textWindowRef);
+		parent.textWindowRef=NULL;
+	}
+	// protect against null pointer
 	if (child == NULL)
 	{
 		log_error("Error creating child window: %s", strerror(errno));
 		return NULL;
 	}
-//TODO: check windowXPos it not right it too right
-	wprintw(child, "%s", parent.content);
+
+	if (parent.content != NULL || strlen(parent.content) > 0)
+		wprintw(child, "%s", parent.content);
+
 	prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1, 
 		windowYPos + numberOfLines - 1, windowXPos + childWidth - 1);
+
 	return child;
 }
 
-void redrawWindows(void)
+void redrawAllWindows(void)
 {
 
 	log_debug("term windows dim lines=%d, cols=%d", LINES , COLS );
 
-	// -- URL window
-	log_debug("draw url window");
-	// windows[URL].boarderWindowRef = drawUrlBox();
-	windows[URL].boarderWindowRef = drawWindow(0, 0, 3, COLS);
-	mvwprintw(windows[URL].boarderWindowRef, 1, 1, "%s %s", 
-		methodNameList[restMethod_ptr % 5], 
-		windows[URL].content);
-	wnoutrefresh(windows[URL].boarderWindowRef);
+	// -- LEFT window
+	log_debug("draw left window");
+	windows[LEFT].boarderWindowRef = drawWindow(3,0,LINES - 3,COLS / 2);
+	wnoutrefresh(windows[LEFT].boarderWindowRef);
+	windows[LEFT].textWindowRef=drawChildWindow(windows[LEFT]);
 
 	// -- RIGHT window
 	log_debug("draw right windows");
 	windows[RIGHT].boarderWindowRef= drawWindow(3, COLS / 2, LINES - 3, COLS / 2);
 	wnoutrefresh(windows[RIGHT].boarderWindowRef);
 	windows[RIGHT].textWindowRef=drawChildWindow(windows[RIGHT]);
-	// wnoutrefresh(windows[RIGHT].textWindowRef);
 
-	log_debug("draw left window");
-	// -- LEFT window
-	windows[LEFT].boarderWindowRef = drawWindow(3,0,LINES - 3,COLS / 2);
-	wnoutrefresh(windows[LEFT].boarderWindowRef);
-	windows[LEFT].textWindowRef=drawChildWindow(windows[LEFT]);
-	mvwprintw(windows[LEFT].textWindowRef, 1, 1, "%s", 
-		windows[LEFT].content);
-
-
+	// -- URL window
+	log_debug("draw url window");
+	windows[URL].boarderWindowRef = drawWindow(0, 0, 3, COLS);
+	mvwprintw(windows[URL].boarderWindowRef, 1, 1, "%s %s", 
+		methodNameList[restMethod_ptr % 5], 
+		windows[URL].content);
+	wnoutrefresh(windows[URL].boarderWindowRef);
 
 	doupdate(); // refresh the screen with the new windows
 	return;
@@ -178,7 +179,7 @@ int main()
 	windows[URL].content = calloc(2, sizeof(char));
 	refresh();
 	// draw the initial window
-	redrawWindows();
+	redrawAllWindows();
 
 	scrollok(windows[RIGHT].boarderWindowRef, true);
 	scrollok(windows[LEFT].boarderWindowRef, true);
@@ -193,22 +194,7 @@ int main()
 	while (true)
 	{
 
-		wclear(windows[ACTIVE_WINDOW].boarderWindowRef);
-		if (windows[ACTIVE_WINDOW].boarderWindowRef == windows[URL].boarderWindowRef)
-		{
-			mvwprintw(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 1, "%s %s", 
-				methodNameList[restMethod_ptr % 5], 
-				windows[ACTIVE_WINDOW].content);
-		}
-		else
-		{
-			mvwprintw(windows[ACTIVE_WINDOW].textWindowRef, 1, 1, "%s", 
-				windows[ACTIVE_WINDOW].content);
-		}
-
-		redrawWindows();
-		// moves cursor to the active window
-		wrefresh(windows[ACTIVE_WINDOW].textWindowRef); 
+		redrawAllWindows();
 
 		ch = getch();
 		if (ch == CTRL('Q'))
@@ -224,12 +210,12 @@ int main()
 		else if (ch== KEY_RESIZE){
 			// resize the windows
 			log_debug("Resizing windows");
-			redrawWindows();
+			redrawAllWindows();
 		}
 		else if (ch == CTRL('L'))
 		{ // ctrl L for clear screen
 			log_debug("Clearing screen");
-			redrawWindows();
+			redrawAllWindows();
 			continue;
 		}
 		else if (ch == CTRL('C'))
@@ -309,15 +295,6 @@ int main()
 			}
 		}
 
-		int x=0,y=0;
-
-		// debug lines only 
-		getyx(windows[URL].boarderWindowRef, y, x);
-		log_debug("Current url window co ord , y=%d, x=%d char=[%c]",x,y,(char)ch);
-		getyx(windows[LEFT].textWindowRef, y, x);
-		log_debug("Current left window co ord , y=%d, x=%d char=[%c]",x,y,(char)ch);
-		getyx(windows[RIGHT].textWindowRef, y, x);
-		log_debug("Current right window co ord , y=%d, x=%d char=[%c]",x,y,(char)ch);
 	}
 
 	endwin(); /* End curses mode		  */
