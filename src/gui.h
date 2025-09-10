@@ -16,6 +16,8 @@ struct guiWindow
 	WINDOW *boarderWindowRef;
 	WINDOW *textWindowRef;
 	char *content;
+	int padTextRows;
+	int padTextCols;
 };
 
 /**************** GLOBALS *****************/

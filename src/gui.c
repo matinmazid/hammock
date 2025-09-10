@@ -82,6 +82,10 @@ WINDOW* drawChildWindow(struct guiWindow parent)
 	if (parent.content != NULL || strlen(parent.content) > 0)
 		wprintw(child, "%s", parent.content);
 
+	parent.padTextRows=windowYPos + numberOfLines;
+	parent.padTextCols=windowXPos + childWidth ;
+	// pad refresh
+	// because this function knows the size of the parent window
 	prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1, 
 		windowYPos + numberOfLines - 1, windowXPos + childWidth - 1);
 
@@ -91,8 +95,8 @@ WINDOW* drawChildWindow(struct guiWindow parent)
 void redrawAllWindows(void)
 {
 
-	log_debug("term windows dim lines=%d, cols=%d", LINES , COLS );
-
+	
+	
 	// -- LEFT window
 	log_debug("draw left window");
 	windows[LEFT].boarderWindowRef = drawWindow(3,0,LINES - 3,COLS / 2);
@@ -114,6 +118,18 @@ void redrawAllWindows(void)
 	wnoutrefresh(windows[URL].boarderWindowRef);
 
 	doupdate(); // refresh the screen with the new windows
+
+	if (ACTIVE_WINDOW==URL)
+		wmove(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 
+			strlen(windows[ACTIVE_WINDOW].content) + 
+			2 + strlen(methodNameList[restMethod_ptr % 5]) );
+	else
+		wmove(windows[ACTIVE_WINDOW].boarderWindowRef, 
+			windows[ACTIVE_WINDOW].padTextRows, 
+			windows[ACTIVE_WINDOW].padTextCols);
+
+
+	wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
 	return;
 }
 
