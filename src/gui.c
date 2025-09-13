@@ -94,8 +94,6 @@ WINDOW* drawChildWindow(struct guiWindow parent)
 
 void redrawAllWindows(void)
 {
-
-	
 	
 	// -- LEFT window
 	log_debug("draw left window");
