@@ -27,16 +27,16 @@ void destroy_win(WINDOW *local_win);
 
 /**************** FUNCTIONS *****************/
 
-WINDOW *drawRightWindow()
-{
-	int y=0,x=0;
-	destroy_win(windows[RIGHT].boarderWindowRef);
-	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, COLS / 2);
-	getmaxyx(windowsPtr, y, x);
-	log_debug("Right window dimensions, y=%d, x=%d", y, x);
-	box(windowsPtr, 0, 0);
-	return windowsPtr;
-}
+// WINDOW *drawRightWindow()
+// {
+// 	int y=0,x=0;
+// 	destroy_win(windows[RIGHT].boarderWindowRef);
+// 	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, COLS / 2);
+// 	getmaxyx(windowsPtr, y, x);
+// 	log_debug("Right window dimensions, y=%d, x=%d", y, x);
+// 	box(windowsPtr, 0, 0);
+// 	return windowsPtr;
+// }
 
 
 WINDOW *drawWindow(int yStart, int xStart,int numLines, int numCols	)
@@ -80,21 +80,24 @@ WINDOW* drawChildWindow(struct guiWindow parent)
 	}
 
 	if (parent.content != NULL || strlen(parent.content) > 0)
+	{
 		wprintw(child, "%s", parent.content);
+		prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1, 
+			windowYPos + windowsYsize -2 , windowXPos + windowsXsize -1 );
+	}
 
 	parent.padTextRows=windowYPos + numberOfLines;
 	parent.padTextCols=windowXPos + childWidth ;
 	// pad refresh
 	// because this function knows the size of the parent window
-	prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1, 
-		windowYPos + numberOfLines - 1, windowXPos + childWidth - 1);
+	// prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1, 
+	// 	windowYPos + numberOfLines - 1, windowXPos + childWidth - 1);
 
 	return child;
 }
 
 void redrawAllWindows(void)
 {
-	
 	// -- LEFT window
 	log_debug("draw left window");
 	windows[LEFT].boarderWindowRef = drawWindow(3,0,LINES - 3,COLS / 2);
