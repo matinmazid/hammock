@@ -27,22 +27,9 @@ void destroy_win(WINDOW *local_win);
 
 /**************** FUNCTIONS *****************/
 
-// WINDOW *drawRightWindow()
-// {
-// 	int y=0,x=0;
-// 	destroy_win(windows[RIGHT].boarderWindowRef);
-// 	WINDOW *windowsPtr = newwin(LINES - 3, (COLS / 2), 3, COLS / 2);
-// 	getmaxyx(windowsPtr, y, x);
-// 	log_debug("Right window dimensions, y=%d, x=%d", y, x);
-// 	box(windowsPtr, 0, 0);
-// 	return windowsPtr;
-// }
-
 
 WINDOW *drawWindow(int yStart, int xStart,int numLines, int numCols	)
 {
-
-	int y=0,x=0;
 
 	log_debug("creating new window");
 	WINDOW *windowsPtr = newwin(numLines, numCols, yStart, xStart);
@@ -88,10 +75,6 @@ WINDOW* drawChildWindow(struct guiWindow parent)
 
 	parent.padTextRows=windowYPos + numberOfLines;
 	parent.padTextCols=windowXPos + childWidth ;
-	// pad refresh
-	// because this function knows the size of the parent window
-	// prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1, 
-	// 	windowYPos + numberOfLines - 1, windowXPos + childWidth - 1);
 
 	return child;
 }
@@ -128,7 +111,6 @@ void redrawAllWindows(void)
 		wmove(windows[ACTIVE_WINDOW].boarderWindowRef, 
 			windows[ACTIVE_WINDOW].padTextRows, 
 			windows[ACTIVE_WINDOW].padTextCols);
-
 
 	wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
 	return;
@@ -222,7 +204,6 @@ int main()
 			log_error("Error reading input: %s", strerror(errno));
 			// skip the error and keep going
 			continue;
-			
 		}
 		else if (ch== KEY_RESIZE){
 			// resize the windows
@@ -237,9 +218,15 @@ int main()
 		}
 		else if (ch == CTRL('C'))
 		{ // ctrl C for clear screen
+			// I have to rethink this at some point might be a memory leak here
 			log_debug("Clearing content");
 			memset(windows[ACTIVE_WINDOW].content, '\0', strlen(windows[ACTIVE_WINDOW].content));
-			wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
+			redrawAllWindows();	
+		}
+		else if(ch==KEY_DOWN && ACTIVE_WINDOW==RIGHT)
+		{
+			// scroll down the right window
+
 		}
 		else if (ch == CTRL('H'))
 		{ // ctrl H for Headers

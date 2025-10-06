@@ -18,6 +18,7 @@ struct guiWindow
 	char *content;
 	int padTextRows;
 	int padTextCols;
+	int columnOffset;
 };
 
 /**************** GLOBALS *****************/
