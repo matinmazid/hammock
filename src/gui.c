@@ -38,13 +38,16 @@ WINDOW *drawWindow(int yStart, int xStart,int numLines, int numCols	)
 	return windowsPtr;
 }
 
-WINDOW* drawChildWindow(struct guiWindow parent)
+WINDOW* drawChildWindow(int parentPtr)
 {
+	log_debug("creating child window for parent %d", parentPtr);
+
+	struct guiWindow parent = windows[parentPtr];
 	int windowYPos=0,windowXPos=0,windowsXsize=0,windowsYsize=0;
-	getbegyx(parent.boarderWindowRef, windowYPos, windowXPos);
+	getbegyx(windows[parentPtr].boarderWindowRef, windowYPos, windowXPos);
 	log_debug("child widow - parent pos  y=%d, x=%d", windowYPos, windowXPos);
 
-	getmaxyx(parent.boarderWindowRef, windowsYsize, windowsXsize);
+	getmaxyx(windows[parentPtr].boarderWindowRef, windowsYsize, windowsXsize);
 	log_debug("child widow - parent size  y=%d, x=%d", windowsYsize, windowsXsize);
 
 	// caclucate the max width of a child window
@@ -54,9 +57,9 @@ WINDOW* drawChildWindow(struct guiWindow parent)
 	int numberOfLines = lengthOfContent / childWidth + 3; // +1 for the last line
 	WINDOW *child = newpad(numberOfLines, childWidth);
 
-	if (parent.textWindowRef!= NULL)
+	if (windows[parentPtr].textWindowRef!= NULL)
 	{
-		destroy_win(parent.textWindowRef);
+		destroy_win(windows[parentPtr].textWindowRef);
 		parent.textWindowRef=NULL;
 	}
 	// protect against null pointer
@@ -66,15 +69,17 @@ WINDOW* drawChildWindow(struct guiWindow parent)
 		return NULL;
 	}
 
-	if (parent.content != NULL || strlen(parent.content) > 0)
+	if (windows[parentPtr].content != NULL || 
+		strlen(windows[parentPtr].content) > 0)
 	{
-		wprintw(child, "%s", parent.content);
+		wprintw(child, "%s", windows[parentPtr].content);
 		prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1, 
 			windowYPos + windowsYsize -2 , windowXPos + windowsXsize -1 );
 	}
 
-	parent.padTextRows=windowYPos + numberOfLines;
-	parent.padTextCols=windowXPos + childWidth ;
+	// why does this not get set right
+	windows[parentPtr].padTextRows=windowYPos + numberOfLines;
+	windows[parentPtr].padTextCols=windowXPos + childWidth ;
 
 	return child;
 }
@@ -82,16 +87,17 @@ WINDOW* drawChildWindow(struct guiWindow parent)
 void redrawAllWindows(void)
 {
 	// -- LEFT window
+	log_debug("active window is %d", ACTIVE_WINDOW);
 	log_debug("draw left window");
 	windows[LEFT].boarderWindowRef = drawWindow(3,0,LINES - 3,COLS / 2);
 	wnoutrefresh(windows[LEFT].boarderWindowRef);
-	windows[LEFT].textWindowRef=drawChildWindow(windows[LEFT]);
+	windows[LEFT].textWindowRef=drawChildWindow(LEFT);
 
 	// -- RIGHT window
 	log_debug("draw right windows");
 	windows[RIGHT].boarderWindowRef= drawWindow(3, COLS / 2, LINES - 3, COLS / 2);
 	wnoutrefresh(windows[RIGHT].boarderWindowRef);
-	windows[RIGHT].textWindowRef=drawChildWindow(windows[RIGHT]);
+	windows[RIGHT].textWindowRef=drawChildWindow(RIGHT);
 
 	// -- URL window
 	log_debug("draw url window");
@@ -101,18 +107,32 @@ void redrawAllWindows(void)
 		windows[URL].content);
 	wnoutrefresh(windows[URL].boarderWindowRef);
 
-	doupdate(); // refresh the screen with the new windows
+	//doupdate(); // refresh the screen with the new windows
 
 	if (ACTIVE_WINDOW==URL)
+	{
 		wmove(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 
 			strlen(windows[ACTIVE_WINDOW].content) + 
 			2 + strlen(methodNameList[restMethod_ptr % 5]) );
-	else
-		wmove(windows[ACTIVE_WINDOW].boarderWindowRef, 
-			windows[ACTIVE_WINDOW].padTextRows, 
-			windows[ACTIVE_WINDOW].padTextCols);
+			doupdate();
+	}
+	else 
+	{
+		wmove(windows[ACTIVE_WINDOW].textWindowRef, 
+			windows[ACTIVE_WINDOW].padTextRows,
+			windows[ACTIVE_WINDOW].padTextCols 
+			);
 
-	wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
+		// calculate the dimensions of the pad to display the correct portion of the content
+
+		int windowBeginYPos=0,windowBeginXPos=0,windowsXsize=0,windowsYsize=0;
+		getbegyx(windows[ACTIVE_WINDOW].boarderWindowRef, windowBeginYPos, windowBeginXPos);
+		getmaxyx(windows[ACTIVE_WINDOW].boarderWindowRef, windowsYsize, windowsXsize);
+		prefresh(windows[ACTIVE_WINDOW].textWindowRef, 0, 0, // start of pad
+			windowBeginYPos+1,windowBeginXPos+1, // start of screen
+			windowBeginYPos + windowsYsize-2 , windowBeginXPos + windowsXsize - 1); // end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
+	}
+
 	return;
 }
 

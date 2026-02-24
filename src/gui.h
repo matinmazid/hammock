@@ -13,8 +13,8 @@
 /**************** STRUCTS *****************/
 struct guiWindow
 {
-	WINDOW *boarderWindowRef;
-	WINDOW *textWindowRef;
+	WINDOW *boarderWindowRef; // the boarder window reference
+	WINDOW *textWindowRef; // text pad reference
 	char *content;
 	int padTextRows;
 	int padTextCols;
