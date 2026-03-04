@@ -27,8 +27,7 @@ void destroy_win(WINDOW *local_win);
 
 /**************** FUNCTIONS *****************/
 
-
-WINDOW *drawWindow(int yStart, int xStart,int numLines, int numCols	)
+WINDOW *drawWindow(int yStart, int xStart, int numLines, int numCols)
 {
 
 	log_debug("creating new window");
@@ -38,12 +37,12 @@ WINDOW *drawWindow(int yStart, int xStart,int numLines, int numCols	)
 	return windowsPtr;
 }
 
-WINDOW* drawChildWindow(int parentPtr)
+WINDOW *drawChildWindow(int parentPtr)
 {
 	log_debug("creating child window for parent %d", parentPtr);
 
 	struct guiWindow parent = windows[parentPtr];
-	int windowYPos=0,windowXPos=0,windowsXsize=0,windowsYsize=0;
+	int windowYPos = 0, windowXPos = 0, windowsXsize = 0, windowsYsize = 0;
 	getbegyx(windows[parentPtr].boarderWindowRef, windowYPos, windowXPos);
 	log_debug("child widow - parent pos  y=%d, x=%d", windowYPos, windowXPos);
 
@@ -51,16 +50,16 @@ WINDOW* drawChildWindow(int parentPtr)
 	log_debug("child widow - parent size  y=%d, x=%d", windowsYsize, windowsXsize);
 
 	// caclucate the max width of a child window
-	int childWidth	= windowsXsize - 2; // -2 for the border
+	int childWidth = windowsXsize - 2; // -2 for the border
 
 	int lengthOfContent = strlen(parent.content);
 	int numberOfLines = lengthOfContent / childWidth + 3; // +1 for the last line
 	WINDOW *child = newpad(numberOfLines, childWidth);
 
-	if (windows[parentPtr].textWindowRef!= NULL)
+	if (windows[parentPtr].textWindowRef != NULL)
 	{
 		destroy_win(windows[parentPtr].textWindowRef);
-		parent.textWindowRef=NULL;
+		parent.textWindowRef = NULL;
 	}
 	// protect against null pointer
 	if (child == NULL)
@@ -69,18 +68,19 @@ WINDOW* drawChildWindow(int parentPtr)
 		return NULL;
 	}
 
-	if (windows[parentPtr].content != NULL || 
+	if (windows[parentPtr].content != NULL ||
 		strlen(windows[parentPtr].content) > 0)
 	{
 		wprintw(child, "%s", windows[parentPtr].content);
-		prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1, 
-			windowYPos + windowsYsize -2 , windowXPos + windowsXsize -1 );
+		prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1,
+				 windowYPos + windowsYsize - 2, windowXPos + windowsXsize - 1);
 	}
 
 	// why does this not get set right
-	windows[parentPtr].padTextRows=windowYPos + numberOfLines;
-	windows[parentPtr].padTextCols=windowXPos + childWidth ;
-
+	windows[parentPtr].padTextRows = windowYPos + numberOfLines;
+	windows[parentPtr].padTextCols = windowXPos + childWidth;
+	windows[parentPtr].padTextTotalLines = numberOfLines;
+	windows[parentPtr].padTextTotalCols = childWidth;
 	return child;
 }
 
@@ -89,48 +89,61 @@ void redrawAllWindows(void)
 	// -- LEFT window
 	log_debug("active window is %d", ACTIVE_WINDOW);
 	log_debug("draw left window");
-	windows[LEFT].boarderWindowRef = drawWindow(3,0,LINES - 3,COLS / 2);
+	windows[LEFT].boarderWindowRef = drawWindow(3, 0, LINES - 3, COLS / 2);
 	wnoutrefresh(windows[LEFT].boarderWindowRef);
-	windows[LEFT].textWindowRef=drawChildWindow(LEFT);
+	windows[LEFT].textWindowRef = drawChildWindow(LEFT);
 
 	// -- RIGHT window
 	log_debug("draw right windows");
-	windows[RIGHT].boarderWindowRef= drawWindow(3, COLS / 2, LINES - 3, COLS / 2);
+	windows[RIGHT].boarderWindowRef = drawWindow(3, COLS / 2, LINES - 3, COLS / 2);
 	wnoutrefresh(windows[RIGHT].boarderWindowRef);
-	windows[RIGHT].textWindowRef=drawChildWindow(RIGHT);
+	windows[RIGHT].textWindowRef = drawChildWindow(RIGHT);
 
 	// -- URL window
 	log_debug("draw url window");
 	windows[URL].boarderWindowRef = drawWindow(0, 0, 3, COLS);
-	mvwprintw(windows[URL].boarderWindowRef, 1, 1, "%s %s", 
-		methodNameList[restMethod_ptr % 5], 
-		windows[URL].content);
+	mvwprintw(windows[URL].boarderWindowRef, 1, 1, "%s %s",
+			  methodNameList[restMethod_ptr % 5],
+			  windows[URL].content);
 	wnoutrefresh(windows[URL].boarderWindowRef);
 
-	//doupdate(); // refresh the screen with the new windows
+	// doupdate(); // refresh the screen with the new windows
 
-	if (ACTIVE_WINDOW==URL)
+	if (ACTIVE_WINDOW == URL)
 	{
-		wmove(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 
-			strlen(windows[ACTIVE_WINDOW].content) + 
-			2 + strlen(methodNameList[restMethod_ptr % 5]) );
-			doupdate();
+		wmove(windows[ACTIVE_WINDOW].boarderWindowRef, 1,
+			  strlen(windows[ACTIVE_WINDOW].content) +
+				  2 + strlen(methodNameList[restMethod_ptr % 5]));
+		doupdate();
 	}
-	else 
+	else
 	{
-		wmove(windows[ACTIVE_WINDOW].textWindowRef, 
-			windows[ACTIVE_WINDOW].padTextRows,
-			windows[ACTIVE_WINDOW].padTextCols 
-			);
-
 		// calculate the dimensions of the pad to display the correct portion of the content
 
-		int windowBeginYPos=0,windowBeginXPos=0,windowsXsize=0,windowsYsize=0;
+		int windowBeginYPos = 0, windowBeginXPos = 0, windowsXsize = 0, windowsYsize = 0;
 		getbegyx(windows[ACTIVE_WINDOW].boarderWindowRef, windowBeginYPos, windowBeginXPos);
 		getmaxyx(windows[ACTIVE_WINDOW].boarderWindowRef, windowsYsize, windowsXsize);
-		prefresh(windows[ACTIVE_WINDOW].textWindowRef, 0, 0, // start of pad
-			windowBeginYPos+1,windowBeginXPos+1, // start of screen
-			windowBeginYPos + windowsYsize-2 , windowBeginXPos + windowsXsize - 1); // end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
+
+		if (windows[ACTIVE_WINDOW].padTextTotalLines > windowsYsize)
+		{
+			wmove(windows[ACTIVE_WINDOW].textWindowRef,
+				  windowsYsize - 3,
+				  0);
+		}
+		else
+		{
+			wmove(windows[ACTIVE_WINDOW].textWindowRef,
+				  windows[ACTIVE_WINDOW].padTextRows,
+				  windows[ACTIVE_WINDOW].padTextCols);
+		}
+		// wmove(windows[ACTIVE_WINDOW].textWindowRef,
+		// 	windows[ACTIVE_WINDOW].padTextRows,
+		// 	windows[ACTIVE_WINDOW].padTextCols
+		// 	);
+
+		prefresh(windows[ACTIVE_WINDOW].textWindowRef, 0, 0,							  // start of pad
+				 windowBeginYPos + 1, windowBeginXPos + 1,								  // start of screen
+				 windowBeginYPos + windowsYsize - 2, windowBeginXPos + windowsXsize - 1); // end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
 	}
 
 	return;
@@ -141,13 +154,13 @@ void appendChar(int newChar, int activeWindowPtr)
 
 	int newStrLen;
 	char *oldPtr = windows[ACTIVE_WINDOW].content;
-	newStrLen = strlen(windows[ACTIVE_WINDOW].content); 
+	newStrLen = strlen(windows[ACTIVE_WINDOW].content);
 
 	// we are adding wasting 5 bytes here to make sure we dont buffer overrun
 	// I'll fix it later
-	char * newStr = calloc(newStrLen+5, sizeof(char));
+	char *newStr = calloc(newStrLen + 5, sizeof(char));
 	memset(newStr, '\0', newStrLen + 4); // clear the memory
-	windows[ACTIVE_WINDOW].content = memcpy(newStr, oldPtr, newStrLen );
+	windows[ACTIVE_WINDOW].content = memcpy(newStr, oldPtr, newStrLen);
 	windows[ACTIVE_WINDOW].content[newStrLen] = (char)newChar;
 	free(oldPtr); // free the old pointer
 }
@@ -174,7 +187,6 @@ void destroy_win(WINDOW *local_win)
 	delwin(local_win);
 }
 
-
 /****************************** MAIN **********************/
 int main()
 {
@@ -188,7 +200,7 @@ int main()
 	// set logging
 	FILE *logFile = fopen("hammock.log", "a");
 	if (logFile != NULL)
-		log_add_fp(logFile,LOG_DEBUG);
+		log_add_fp(logFile, LOG_DEBUG);
 
 	log_set_quiet(true); // set quiet mode to true, so we don't print to stdout
 
@@ -225,7 +237,8 @@ int main()
 			// skip the error and keep going
 			continue;
 		}
-		else if (ch== KEY_RESIZE){
+		else if (ch == KEY_RESIZE)
+		{
 			// resize the windows
 			log_debug("Resizing windows");
 			redrawAllWindows();
@@ -241,12 +254,11 @@ int main()
 			// I have to rethink this at some point might be a memory leak here
 			log_debug("Clearing content");
 			memset(windows[ACTIVE_WINDOW].content, '\0', strlen(windows[ACTIVE_WINDOW].content));
-			redrawAllWindows();	
+			redrawAllWindows();
 		}
-		else if(ch==KEY_DOWN && ACTIVE_WINDOW==RIGHT)
+		else if (ch == KEY_DOWN && ACTIVE_WINDOW == RIGHT)
 		{
 			// scroll down the right window
-
 		}
 		else if (ch == CTRL('H'))
 		{ // ctrl H for Headers
@@ -272,53 +284,49 @@ int main()
 			}
 			else
 				restMethod_ptr--; // this will cycle through 0-4
-
 		}
-		else if (ch==KEY_UP && ACTIVE_WINDOW==RIGHT)
+		else if (ch == KEY_UP && ACTIVE_WINDOW == RIGHT)
 		{
 			// scroll up the right window
-			int scrollRtn=scroll(windows[RIGHT].textWindowRef);
+			int scrollRtn = scroll(windows[RIGHT].textWindowRef);
 
-			log_debug("Scrolling up the right window rtn= %d",scrollRtn);
+			log_debug("Scrolling up the right window rtn= %d", scrollRtn);
 			wrefresh(windows[RIGHT].textWindowRef);
 			continue;
 		}
 		else if (ch == CTRL('\t')) // switch window
 		{
 			activeWindowPtr++;
-
 		}
 		else if ((ch == CTRL('e')) || (ch == '\n' && ACTIVE_WINDOW == URL))
 		{
 			log_trace("Executing REST call: %s", windows[URL].content);
 			struct RestResponse restResult = executeRest(windows[URL].content, restMethod_ptr % 5,
-					ContentTypes, windows[LEFT].content);
-		
-			windows[RIGHT].content=restResult.responseBody;
+														 ContentTypes, windows[LEFT].content);
+
+			windows[RIGHT].content = restResult.responseBody;
 			log_trace("REST call executed: %s", restResult.responseBody);
-			windows[RIGHT].content=restResult.responseBody; 
-			mvwprintw(windows[RIGHT].textWindowRef, 1, 2, "%s ", windows[RIGHT].content );
+			windows[RIGHT].content = restResult.responseBody;
+			mvwprintw(windows[RIGHT].textWindowRef, 1, 2, "%s ", windows[RIGHT].content);
 			wrefresh(windows[RIGHT].textWindowRef);
-		
 		}
 		else if (ch == 127) // what is back space? just del
 		{
 			unsigned int existingLength = strlen(windows[ACTIVE_WINDOW].content);
 			if (existingLength > 0)
 			{
-				windows[ACTIVE_WINDOW].content[existingLength - 1] = '\0';	
+				windows[ACTIVE_WINDOW].content[existingLength - 1] = '\0';
 			}
 		}
 		else
 		{
 			// if the character is not a control character or a newline
 			// and we are not in the URL window
-			if (ch=='\n'||(!iscntrl(ch)))
+			if (ch == '\n' || (!iscntrl(ch)))
 			{
 				appendChar(ch, activeWindowPtr);
 			}
 		}
-
 	}
 
 	endwin(); /* End curses mode		  */
@@ -330,4 +338,3 @@ int main()
 	}
 	return 0;
 }
-

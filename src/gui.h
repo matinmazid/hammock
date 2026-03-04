@@ -18,6 +18,8 @@ struct guiWindow
 	char *content;
 	int padTextRows;
 	int padTextCols;
+	int padTextTotalLines;
+	int padTextTotalCols;
 };
 
 /**************** GLOBALS *****************/
