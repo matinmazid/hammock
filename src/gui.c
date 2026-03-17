@@ -37,6 +37,32 @@ WINDOW *drawWindow(int yStart, int xStart, int numLines, int numCols)
 	return windowsPtr;
 }
 
+int calculateRequiredPadHeight(char *content, int childWidth)
+{
+	int lengthOfContent=0;
+	int rowCount=0;
+	while (*content != '\0')	{
+		if (*content != '\n') {
+			lengthOfContent++;
+			if (lengthOfContent >= childWidth) {
+				rowCount++;
+				lengthOfContent = 0; // reset the length of content for the next row
+			}
+		}
+		else {
+			rowCount++;
+			lengthOfContent = 0; // reset the length of content for the next row
+		}
+		content++;
+	}
+	// {
+	// 	if (token == NULL)
+	// 		break;
+	// 	tokenLenghth=strlen(token);
+	// 	lengthOfContent += (int) (tokenLenghth / childWidth) + 1; 
+	// }
+	return rowCount;
+}
 WINDOW *drawChildWindow(int parentPtr)
 {
 	log_debug("creating child window for parent %d", parentPtr);
@@ -52,8 +78,9 @@ WINDOW *drawChildWindow(int parentPtr)
 	// caclucate the max width of a child window
 	int childWidth = windowsXsize - 2; // -2 for the border
 
-	int lengthOfContent = strlen(parent.content);
-	int numberOfLines = lengthOfContent / childWidth + 3; // +1 for the last line
+	//int lengthOfContent = strlen(parent.content);
+	int numberOfLines = calculateRequiredPadHeight(parent.content, childWidth)+1;
+	// int numberOfLines = lengthOfContent / childWidth + 3; // +1 for the last line
 	WINDOW *child = newpad(numberOfLines, childWidth);
 
 	if (windows[parentPtr].textWindowRef != NULL)
@@ -136,16 +163,13 @@ void redrawAllWindows(void)
 				  windows[ACTIVE_WINDOW].padTextRows,
 				  windows[ACTIVE_WINDOW].padTextCols);
 		}
-		// wmove(windows[ACTIVE_WINDOW].textWindowRef,
-		// 	windows[ACTIVE_WINDOW].padTextRows,
-		// 	windows[ACTIVE_WINDOW].padTextCols
-		// 	);
 
 		prefresh(windows[ACTIVE_WINDOW].textWindowRef, 0, 0,							  // start of pad
 				 windowBeginYPos + 1, windowBeginXPos + 1,								  // start of screen
 				 windowBeginYPos + windowsYsize - 2, windowBeginXPos + windowsXsize - 1); // end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
 	}
 
+	doupdate(); // refresh the screen with the new windows
 	return;
 }
 
