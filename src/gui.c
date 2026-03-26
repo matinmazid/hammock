@@ -55,12 +55,6 @@ int calculateRequiredPadHeight(char *content, int childWidth)
 		}
 		content++;
 	}
-	// {
-	// 	if (token == NULL)
-	// 		break;
-	// 	tokenLenghth=strlen(token);
-	// 	lengthOfContent += (int) (tokenLenghth / childWidth) + 1; 
-	// }
 	return rowCount;
 }
 WINDOW *drawChildWindow(int parentPtr)
