@@ -158,7 +158,8 @@ void redrawAllWindows(void)
 				  windows[ACTIVE_WINDOW].padTextCols);
 		}
 
-		prefresh(windows[ACTIVE_WINDOW].textWindowRef, 0, 0,							  // start of pad
+		prefresh(windows[ACTIVE_WINDOW].textWindowRef, 
+			windows[ACTIVE_WINDOW].scrollOffset, 0,							  // start of pad
 				 windowBeginYPos + 1, windowBeginXPos + 1,								  // start of screen
 				 windowBeginYPos + windowsYsize - 2, windowBeginXPos + windowsXsize - 1); // end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
 	}
@@ -224,7 +225,11 @@ int main()
 
 	// create a valid pointer
 	windows[RIGHT].content = calloc(0, sizeof(char));
+	windows[RIGHT].scrollOffset = 0;
+	
 	windows[LEFT].content = calloc(2, sizeof(char));
+	windows[LEFT].scrollOffset = 0;
+
 	windows[URL].content = calloc(2, sizeof(char));
 	refresh();
 	// draw the initial window
@@ -274,10 +279,6 @@ int main()
 			memset(windows[ACTIVE_WINDOW].content, '\0', strlen(windows[ACTIVE_WINDOW].content));
 			redrawAllWindows();
 		}
-		else if (ch == KEY_DOWN && ACTIVE_WINDOW == RIGHT)
-		{
-			// scroll down the right window
-		}
 		else if (ch == CTRL('H'))
 		{ // ctrl H for Headers
 
@@ -303,13 +304,35 @@ int main()
 			else
 				restMethod_ptr--; // this will cycle through 0-4
 		}
-		else if (ch == KEY_UP && ACTIVE_WINDOW == RIGHT)
+		else if (ch == KEY_UP &&  
+			(ACTIVE_WINDOW == RIGHT || ACTIVE_WINDOW == LEFT))
 		{
 			// scroll up the right window
-			int scrollRtn = scroll(windows[RIGHT].textWindowRef);
+			int scrollRtn = scroll(windows[ACTIVE_WINDOW].textWindowRef);
+			if (scrollRtn == ERR)
+			{
+				log_error("Error scrolling up: %s", strerror(errno));
+			}
 
-			log_debug("Scrolling up the right window rtn= %d", scrollRtn);
-			wrefresh(windows[RIGHT].textWindowRef);
+			windows[ACTIVE_WINDOW].scrollOffset -= 1;
+			log_debug("Scrolling up the active window [%d] rtn= %d ", 
+				ACTIVE_WINDOW,
+				scrollRtn);
+			continue;
+		}
+		else if (ch == KEY_DOWN && 
+			(ACTIVE_WINDOW == RIGHT || ACTIVE_WINDOW == LEFT))
+		{
+			// scroll down the right window
+			int scrollRtn = wscrl(windows[ACTIVE_WINDOW].textWindowRef, 1);
+			if (scrollRtn == ERR)
+			{
+				log_error("Error scrolling down: %s", strerror(errno));
+			}
+			windows[ACTIVE_WINDOW].scrollOffset += 1;
+			log_debug("Scrolling down the active window [%d] rtn= %d", 
+				ACTIVE_WINDOW,
+				scrollRtn);
 			continue;
 		}
 		else if (ch == CTRL('\t')) // switch window

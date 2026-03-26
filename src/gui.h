@@ -20,6 +20,7 @@ struct guiWindow
 	int padTextCols;
 	int padTextTotalLines;
 	int padTextTotalCols;
+	int scrollOffset;
 };
 
 /**************** GLOBALS *****************/
