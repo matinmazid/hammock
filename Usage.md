@@ -1,5 +1,7 @@
-### requireed terminal capbilities
+### required terminal capbilities
 requires xterm compatibility
+TODO: document user how to check termcap
+
 ###to run 
 ```
 <path/to/executable>/hammock
@@ -15,3 +17,4 @@ requires xterm compatibility
 | < DOWN ARROW> while URL bar is active   | cycle down through the list of http methods|
 | < CTRL >  e | execute the rest action |
 | < ENTER > while the URL bar is active | execute the rest action|
+|< CTRL > c| while in editable window| clears window|
