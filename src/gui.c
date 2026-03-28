@@ -307,32 +307,18 @@ int main()
 		else if (ch == KEY_UP &&  
 			(ACTIVE_WINDOW == RIGHT || ACTIVE_WINDOW == LEFT))
 		{
-			// scroll up the right window
-			int scrollRtn = scroll(windows[ACTIVE_WINDOW].textWindowRef);
-			if (scrollRtn == ERR)
-			{
-				log_error("Error scrolling up: %s", strerror(errno));
+			if (windows[ACTIVE_WINDOW].scrollOffset <= 0) {
+				continue; // we are already at the top of the window, so we can't scroll up anymore
 			}
 
 			windows[ACTIVE_WINDOW].scrollOffset -= 1;
-			log_debug("Scrolling up the active window [%d] rtn= %d ", 
-				ACTIVE_WINDOW,
-				scrollRtn);
 			continue;
 		}
 		else if (ch == KEY_DOWN && 
 			(ACTIVE_WINDOW == RIGHT || ACTIVE_WINDOW == LEFT))
 		{
 			// scroll down the right window
-			int scrollRtn = wscrl(windows[ACTIVE_WINDOW].textWindowRef, 1);
-			if (scrollRtn == ERR)
-			{
-				log_error("Error scrolling down: %s", strerror(errno));
-			}
 			windows[ACTIVE_WINDOW].scrollOffset += 1;
-			log_debug("Scrolling down the active window [%d] rtn= %d", 
-				ACTIVE_WINDOW,
-				scrollRtn);
 			continue;
 		}
 		else if (ch == CTRL('\t')) // switch window

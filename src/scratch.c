@@ -3,12 +3,11 @@
 // #include <strings.h>
 #include <string.h>
 #ifndef __HAMMOCK_GUI_H
-#include "gui.h"
 #endif
 #include "webClient.h"
 #include <ctype.h>
 #include <curl/curl.h>
-
+#include "gui.h"
 #include <menu.h>
 #include "menu.h"
 #include <curses.h>
@@ -16,6 +15,22 @@
 #include "log.h"
 extern void doMenu();
 
+int calculateRequiredPadHeight(char *content, int childWidth)
+{
+	char * token;
+	int lengthOfContent=0;
+	int tokenLenghth = 0;
+	token = strtok(content, "\n");
+	token = strtok(NULL, "\n");
+	// while (NULL!=(token=strtok(content, "\n") ))	
+	// {
+	// 	if (token == NULL)
+	// 		break;
+	// 	tokenLenghth=strlen(token);
+	// 	lengthOfContent += (int) (tokenLenghth / childWidth) + 1; 
+	// }
+	return lengthOfContent ;
+}
 int main(){
 
 	// char* request[]={
@@ -50,16 +65,18 @@ int main(){
 	// 	log_info("--------- DONE ---------- %s %d ", request[x], x);
 	// }
 
-	initscr(); /* start curses mode 		*/
-	raw();
+	char * testStr = "this is a test string that should be long enough to require multiple lines \nin the child window";
+	calculateRequiredPadHeight(testStr, 20);
+	// initscr(); /* start curses mode 		*/
+	// raw();
 	// noecho();
-	keypad(stdscr, true); /* i need that nifty f1 	*/
-	WINDOW *pad = newpad(20, 3);
+	// keypad(stdscr, true); /* i need that nifty f1 	*/
+	// WINDOW *pad = newpad(20, 3);
 
-	box(pad,0,0);
-	int x= getch();
-	mvwprintw(pad,2,2, "1234567890,");
-	prefresh(pad,5,2,5,5,25,15);
-	getch();
-	endwin();
+	// box(pad,0,0);
+	// int x= getch();
+	// mvwprintw(pad,2,2, "1234567890,");
+	// prefresh(pad,5,2,5,5,25,15);
+	// getch();
+	// endwin();
 }
