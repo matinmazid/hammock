@@ -57,6 +57,7 @@ int calculateRequiredPadHeight(char *content, int childWidth)
 	}
 	return rowCount;
 }
+
 WINDOW *drawChildWindow(int parentPtr)
 {
 	log_debug("creating child window for parent %d", parentPtr);
@@ -148,7 +149,7 @@ void redrawAllWindows(void)
 		if (windows[ACTIVE_WINDOW].padTextTotalLines > windowsYsize)
 		{
 			wmove(windows[ACTIVE_WINDOW].textWindowRef,
-				  windowsYsize - 3,
+				  windowsYsize - 3+windows[ACTIVE_WINDOW].scrollOffset,
 				  0);
 		}
 		else
