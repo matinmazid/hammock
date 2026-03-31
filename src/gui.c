@@ -94,8 +94,8 @@ WINDOW *drawChildWindow(int parentPtr)
 		strlen(windows[parentPtr].content) > 0)
 	{
 		wprintw(child, "%s", windows[parentPtr].content);
-		prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1,
-				 windowYPos + windowsYsize - 2, windowXPos + windowsXsize - 1);
+		// prefresh(child, 0, 0, windowYPos + 1, windowXPos + 1,
+		// 		 windowYPos + windowsYsize - 2, windowXPos + windowsXsize - 1);
 	}
 
 	// why does this not get set right
@@ -136,7 +136,7 @@ void redrawAllWindows(void)
 		wmove(windows[ACTIVE_WINDOW].boarderWindowRef, 1,
 			  strlen(windows[ACTIVE_WINDOW].content) +
 				  2 + strlen(methodNameList[restMethod_ptr % 5]));
-		doupdate();
+		// doupdate();
 	}
 	else
 	{
