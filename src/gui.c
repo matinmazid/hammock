@@ -151,18 +151,27 @@ void redrawAllWindows(void)
 			wmove(windows[ACTIVE_WINDOW].textWindowRef,
 				  windowsYsize - 3+windows[ACTIVE_WINDOW].scrollOffset,
 				  0);
+
+			prefresh(windows[ACTIVE_WINDOW].textWindowRef, 
+				windows[ACTIVE_WINDOW].scrollOffset, 0,							  // start of pad
+					windowBeginYPos + 1, windowBeginXPos + 1,								  // start of screen
+					windowBeginYPos + windowsYsize - 2, windowBeginXPos + windowsXsize - 1); // end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
+
 		}
 		else
 		{
 			wmove(windows[ACTIVE_WINDOW].textWindowRef,
 				  windows[ACTIVE_WINDOW].padTextRows,
 				  windows[ACTIVE_WINDOW].padTextCols);
+			
+			prefresh(windows[ACTIVE_WINDOW].textWindowRef, 
+			0, 0,
+			windowBeginYPos + 1, windowBeginXPos + 1,								  // start of screen
+			windows[ACTIVE_WINDOW].padTextRows,
+			windowBeginXPos + windowsXsize - 1);
+			
 		}
 
-		prefresh(windows[ACTIVE_WINDOW].textWindowRef, 
-			windows[ACTIVE_WINDOW].scrollOffset, 0,							  // start of pad
-				 windowBeginYPos + 1, windowBeginXPos + 1,								  // start of screen
-				 windowBeginYPos + windowsYsize - 2, windowBeginXPos + windowsXsize - 1); // end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
 	}
 
 	doupdate(); // refresh the screen with the new windows
