@@ -24,6 +24,7 @@ extern struct guiWindow windows[3];
 static int activeWindowPtr = 0;
 static int restMethod_ptr = 0;
 void destroy_win(WINDOW *local_win);
+void renderTextPadWindow(int aWindowPtr);
 
 /**************** FUNCTIONS *****************/
 
@@ -129,53 +130,63 @@ void redrawAllWindows(void)
 			  windows[URL].content);
 	wnoutrefresh(windows[URL].boarderWindowRef);
 
-	// doupdate(); // refresh the screen with the new windows
 
 	if (ACTIVE_WINDOW == URL)
 	{
+		renderTextPadWindow(LEFT);
+		renderTextPadWindow(RIGHT);
+
 		wmove(windows[ACTIVE_WINDOW].boarderWindowRef, 1,
 			  strlen(windows[ACTIVE_WINDOW].content) +
 				  2 + strlen(methodNameList[restMethod_ptr % 5]));
-		// doupdate();
+		wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
 	}
-	else
-	{
-		// calculate the dimensions of the pad to display the correct portion of the content
+	else{
+
+		renderTextPadWindow(LEFT);
+		renderTextPadWindow(RIGHT);
+		renderTextPadWindow(ACTIVE_WINDOW);
+	}
+
+
+	doupdate(); // refresh the screen with the new windows
+	return;
+}
+
+// render the text and place the cursor at the end of the text
+void renderTextPadWindow(int aWindowPtr){
 
 		int windowBeginYPos = 0, windowBeginXPos = 0, windowsXsize = 0, windowsYsize = 0;
-		getbegyx(windows[ACTIVE_WINDOW].boarderWindowRef, windowBeginYPos, windowBeginXPos);
-		getmaxyx(windows[ACTIVE_WINDOW].boarderWindowRef, windowsYsize, windowsXsize);
+		getbegyx(windows[aWindowPtr].boarderWindowRef, windowBeginYPos, windowBeginXPos);
+		getmaxyx(windows[aWindowPtr].boarderWindowRef, windowsYsize, windowsXsize);
 
-		if (windows[ACTIVE_WINDOW].padTextTotalLines > windowsYsize)
+		if (windows[aWindowPtr].padTextTotalLines > windowsYsize)
 		{
-			wmove(windows[ACTIVE_WINDOW].textWindowRef,
-				  windowsYsize - 3+windows[ACTIVE_WINDOW].scrollOffset,
+			wmove(windows[aWindowPtr].textWindowRef,
+				  windowsYsize - 3+windows[aWindowPtr].scrollOffset,
 				  0);
 
-			prefresh(windows[ACTIVE_WINDOW].textWindowRef, 
-				windows[ACTIVE_WINDOW].scrollOffset, 0,							  // start of pad
-					windowBeginYPos + 1, windowBeginXPos + 1,								  // start of screen
-					windowBeginYPos + windowsYsize - 2, windowBeginXPos + windowsXsize - 1); // end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
+			prefresh(windows[aWindowPtr].textWindowRef, 
+				windows[aWindowPtr].scrollOffset, 0,			// start of pad
+					windowBeginYPos + 1, windowBeginXPos + 1,	// start of screen
+					windowBeginYPos + windowsYsize - 2, 
+					windowBeginXPos + windowsXsize - 1); 		// end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
 
 		}
 		else
 		{
-			wmove(windows[ACTIVE_WINDOW].textWindowRef,
-				  windows[ACTIVE_WINDOW].padTextRows,
-				  windows[ACTIVE_WINDOW].padTextCols);
+			wmove(windows[aWindowPtr].textWindowRef,
+				  windows[aWindowPtr].padTextRows,
+				  windows[aWindowPtr].padTextCols);
 			
-			prefresh(windows[ACTIVE_WINDOW].textWindowRef, 
-			0, 0,
-			windowBeginYPos + 1, windowBeginXPos + 1,								  // start of screen
-			windows[ACTIVE_WINDOW].padTextRows,
-			windowBeginXPos + windowsXsize - 1);
+			prefresh(windows[aWindowPtr].textWindowRef, 
+				0, 0,
+				windowBeginYPos + 1, windowBeginXPos + 1,	// start of screen
+				windows[aWindowPtr].padTextRows,
+				windowBeginXPos + windowsXsize - 1);
 			
 		}
 
-	}
-
-	doupdate(); // refresh the screen with the new windows
-	return;
 }
 
 void appendChar(int newChar, int activeWindowPtr)
