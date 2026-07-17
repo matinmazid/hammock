@@ -27,9 +27,10 @@ void doMenu()
 
     ITEM** menuItemsList;
     MENU* headerMenu;
+    WINDOW* my_menu_win;
 
-    // my_menu_win = newwin(10, 40, 0, 0);
-    // box(my_menu_win, 1, 1);
+    my_menu_win = newwin(10, 40, 0, 0);
+    box(my_menu_win, 0, 0);
 
     // try to get the ArraySize Macro working
     /* available ContentType json
@@ -50,6 +51,8 @@ void doMenu()
     menuItemsList[nHeaderTypeCount] = (ITEM*)NULL;
     headerMenu = new_menu((ITEM**)menuItemsList);
     post_menu(headerMenu);
+    set_menu_win(headerMenu, my_menu_win);
+    wrefresh(my_menu_win);
     refresh();
     int c;
     nl();
