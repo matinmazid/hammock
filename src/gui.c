@@ -287,12 +287,6 @@ int main()
 			log_debug("Resizing windows");
 			redrawAllWindows();
 		}
-		else if (ch == CTRL('L'))
-		{ // ctrl L for clear screen
-			log_debug("Clearing screen");
-			redrawAllWindows();
-			continue;
-		}
 		else if (ch == CTRL('C'))
 		{ // ctrl C for clear screen
 			// I have to rethink this at some point might be a memory leak here
@@ -300,8 +294,8 @@ int main()
 			memset(windows[ACTIVE_WINDOW].content, '\0', strlen(windows[ACTIVE_WINDOW].content));
 			redrawAllWindows();
 		}
-		else if (ch == CTRL('H'))
-		{ // ctrl H for Headers
+		else if (ch == CTRL('H') || ch == KEY_BACKSPACE)
+		{ // ctrl-H / some terminals send backspace as KEY_BACKSPACE
 
 			doMenu();
 			// post_menu(headerMenu);

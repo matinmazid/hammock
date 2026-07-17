@@ -5,11 +5,11 @@ BIN := bin
 CPPFLAGS := $(shell pkg-config --cflags libcurl)
 LDFLAGS := $(shell pkg-config --libs libcurl)
 
-hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o menu.o log.o
+hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o headerMenu.o log.o
 	@mkdir -p $(OBJECTS)
 	@mkdir -p $(BIN)
 	gcc $(CFLAGS) -g $(SRCDIR)gui.c  -o $(BIN)/hammock \
-	 $(OBJECTS)/menu.o \
+	 $(OBJECTS)/headerMenu.o \
 	 -lmenu -lncurses $(OBJECTS)/webClient.o \
 	 $(OBJECTS)/webClientCommon.o  \
 	 $(OBJECTS)/log.o \
@@ -32,8 +32,8 @@ webClient.o: $(SRCDIR)webClient.c  $(SRCDIR)webClientCommon.c
 	gcc $(CFLAGS) -c $(SRCDIR)webClient.c -o $(OBJECTS)/webClient.o  
 	gcc $(CFLAGS) -c $(SRCDIR)webClientCommon.c -o $(OBJECTS)/webClientCommon.o 
 
-menu.o: $(SRCDIR)menu.c
-	gcc $(CFLAGS) -c  $(SRCDIR)menu.c -o $(OBJECTS)/menu.o
+headerMenu.o: $(SRCDIR)headerMenu.c
+	gcc $(CFLAGS) -c  $(SRCDIR)headerMenu.c -o $(OBJECTS)/headerMenu.o
 
 log.o: $(SRCDIR)log.c $(SRCDIR)log.h
 	gcc $(CFLAGS) -c  $(SRCDIR)log.c -o $(OBJECTS)/log.o
