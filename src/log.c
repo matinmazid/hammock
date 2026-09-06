@@ -24,6 +24,8 @@
 
 #define MAX_CALLBACKS 32
 
+FILE *logFile = NULL;
+
 typedef struct {
   log_LogFn fn;
   void *udata;
@@ -136,6 +138,23 @@ static void init_event(log_Event *ev, void *udata) {
   ev->udata = udata;
 }
 
+void close_log_file() {
+
+	// close log file
+	if (logFile != NULL)
+	{
+		fclose(logFile);
+		logFile = NULL;
+	}
+}
+void init_file(){
+	// set logging
+	logFile = fopen("hammock.log", "a");
+	if (logFile != NULL)
+		log_add_fp(logFile, LOG_DEBUG);
+
+	log_set_quiet(true); // set quiet mode to true, so we don't print to stdout
+}
 
 void log_log(int level, const char *file, int line, const char *fmt, ...) {
   log_Event ev = {

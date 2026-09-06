@@ -237,13 +237,7 @@ int main()
 	noecho();
 	keypad(stdscr, true); /* i need that nifty f1 	*/
 
-	// set logging
-	FILE *logFile = fopen("hammock.log", "a");
-	if (logFile != NULL)
-		log_add_fp(logFile, LOG_DEBUG);
-
-	log_set_quiet(true); // set quiet mode to true, so we don't print to stdout
-
+	init_file(); // initialize the log file
 	// create a valid pointer
 	windows[RIGHT].content = calloc(0, sizeof(char));
 	windows[RIGHT].scrollOffset = 0;
@@ -295,8 +289,8 @@ int main()
 			redrawAllWindows();
 		}
 		else if (ch == CTRL('H') || ch == KEY_BACKSPACE)
-		{ // ctrl-H / some terminals send backspace as KEY_BACKSPACE
-
+		{ // ctrl-M / some terminals send backspace as KEY_BACKSPACE
+			log_debug("menu called");
 			doMenu();
 			// post_menu(headerMenu);
 			box(windows[LEFT].boarderWindowRef, 0, 0);
@@ -372,11 +366,6 @@ int main()
 	}
 
 	endwin(); /* End curses mode		  */
-
-	// close log file
-	if (logFile != NULL)
-	{
-		fclose(logFile);
-	}
+	close_log_file(); // close the log file
 	return 0;
 }

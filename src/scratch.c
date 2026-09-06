@@ -1,27 +1,26 @@
-
+#include <stdio.h>
 #include <stdlib.h>
 // #include <strings.h>
 #include <string.h>
-#ifndef __HAMMOCK_GUI_H
-#endif
-#include "webClient.h"
-#include <ctype.h>
-#include <curl/curl.h>
-#include "gui.h"
-#include <menu.h>
-#include "menu.h"
-#include <curses.h>
-#include "webClient.h"
-#include "log.h"
-extern void doMenu();
+// #ifndef __HAMMOCK_GUI_H
+// #endif
+// #include "webClient.h"
+// #include <ctype.h>
+// #include <curl/curl.h>
+// #include "gui.h"
+// #include <menu.h>
+// #include "menu.h"
+// #include <curses.h>
+// #include "webClient.h"
+// #include "log.h"
+// extern void doMenu();
 
 int calculateRequiredPadHeight(char *content, int childWidth)
 {
-	char * token;
 	int lengthOfContent=0;
-	int tokenLenghth = 0;
-	token = strtok(content, "\n");
-	token = strtok(NULL, "\n");
+	// int tokenLenghth = 0;
+	// char * token = strtok(content, "\n");
+	// token = strtok(NULL, "\n");
 	// while (NULL!=(token=strtok(content, "\n") ))	
 	// {
 	// 	if (token == NULL)
@@ -64,7 +63,7 @@ int main(){
 	// 	printf("Response Client Message: %s\n", r.client_message);	
 	// 	log_info("--------- DONE ---------- %s %d ", request[x], x);
 	// }
-
+	printf("Hello World\n");
 	char * testStr = "this is a test string that should be long enough to require multiple lines \nin the child window";
 	calculateRequiredPadHeight(testStr, 20);
 	// initscr(); /* start curses mode 		*/

@@ -1,4 +1,5 @@
-CFLAGS := -g -Wall -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer -Wno-unused-function
+CFLAGS := -g -Wall -Wno-unused-function
+SANITIZER_FLAGS := -fsanitize=address -fsanitize=undefined -fno-omit-frame-pointer
 SRCDIR := src/
 OBJECTS := objects
 BIN := bin
@@ -16,14 +17,28 @@ hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o headerMenu.o log.o
 	 -lcurl 
 	chmod u+x $(BIN)/hammock
 
-scratch: src/scratch.c
+scratch: src/scratch.c  webClient.o webClientCommon.o headerMenu.o log.o
+	@mkdir -p $(OBJECTS)
+	@mkdir -p $(BIN)
 	gcc $(CFLAGS)  -g $(SRCDIR)scratch.c -o $(BIN)/scratch \
-	 $(OBJECTS)/menu.o \
+	 $(OBJECTS)/headerMenu.o \
 	 -lmenu -lncurses $(OBJECTS)/webClient.o \
 	 $(OBJECTS)/webClientCommon.o  \
 	 -lcurl \
 	 $(OBJECTS)/log.o
 	chmod u+x $(BIN)/scratch
+
+# -lmenu must come before -lncurses, otherwise you may get errors.
+sanitize: $(SRCDIR)scratch.c webClient.o webClientCommon.o headerMenu.o log.o
+	@mkdir -p $(OBJECTS)
+	@mkdir -p $(BIN)
+	gcc $(CFLAGS) $(SANITIZER_FLAGS) -g $(SRCDIR)scratch.c -o $(BIN)/scratch-sanitize \
+	 $(OBJECTS)/headerMenu.o \
+	 -lmenu -lncurses $(OBJECTS)/webClient.o \
+	 $(OBJECTS)/webClientCommon.o  \
+	 -lcurl \
+	 $(OBJECTS)/log.o
+	chmod u+x $(BIN)/scratch-sanitize
 
 webClientCommon.o: $(SRCDIR)webClientCommon.c
 	gcc $(CFLAGS) -c $(SRCDIR)webClientCommon.c -o $(OBJECTS)/webClientCommon.o
