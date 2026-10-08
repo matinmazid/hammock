@@ -18,3 +18,4 @@ TODO: document user how to check termcap
 | < CTRL >  e | execute the rest action |
 | < ENTER > while the URL bar is active | execute the rest action|
 |< CTRL > c| clears window|
+|< ESC > | toggles menu window|

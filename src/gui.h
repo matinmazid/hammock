@@ -9,6 +9,7 @@
 #define __HAMMOCK_GUI_H 1
 
 #define CTRL(x) ((x) & 0x1f)
+#define ESC 27
 
 /**************** STRUCTS *****************/
 struct guiWindow

@@ -288,8 +288,8 @@ int main()
 			memset(windows[ACTIVE_WINDOW].content, '\0', strlen(windows[ACTIVE_WINDOW].content));
 			redrawAllWindows();
 		}
-		else if (ch == CTRL('H') || ch == KEY_BACKSPACE)
-		{ // ctrl-M / some terminals send backspace as KEY_BACKSPACE
+		else if (ch == ESC )
+		{ //  ESC key for menu
 			log_debug("menu called");
 			doMenu();
 			// post_menu(headerMenu);

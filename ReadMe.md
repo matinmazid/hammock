@@ -20,7 +20,8 @@ make hammock
 ```
 
 ## Controls
-- `Ctrl+Q` — quit the program
+- `Ctrl+Q` — quit the program, exit menu
+- `delete` - while in a menu, exit menu
 - `Ctrl+L` — clear and redraw the screen
 - `Ctrl+C` — clear content in the current active window
 - `Ctrl+H` — open the headers/menu interface
