@@ -5,6 +5,13 @@
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
 #include "log.h"
 #include "gui.h"
+#include "string.h"
+
+struct menuDetails {
+    ITEM** itemListPtr;
+    int windowWidth;
+    int menuItemCount;
+};
 
 struct choice {
     char *name;
@@ -20,26 +27,23 @@ struct choice choices[] = {
     };
 
 extern void doMenu();
-ITEM **generateMenu();
+struct menuDetails generateMenu();
 void destroyMenu(ITEM**menuItemsList, MENU *my_menu);
-void update_description(WINDOW *description_win, const char *description);
+int calcMenuWidth(int, int, int);
 MENU *my_menu;
 extern char *ContentTypes[];
 
 void doMenu()
 {
 
-    ITEM **menuItemsList;
+    struct menuDetails menuItemsList;
     WINDOW *my_menu_win;
-    WINDOW *description_win;
 
     menuItemsList = generateMenu();
-    my_menu = new_menu((ITEM **)menuItemsList);
+    my_menu = new_menu(menuItemsList.itemListPtr);
 
-    description_win = newwin(3, 38, 12, 2); // TODO calcuate it
-    update_description(description_win, choices[0].description); // print the description of the first item
 
-    my_menu_win = newwin(10, 40, 2, 2);
+    my_menu_win = newwin(menuItemsList.menuItemCount, menuItemsList.windowWidth, 2, 2);
     keypad(my_menu_win, TRUE);
     box(my_menu_win, 0, 0);
     set_menu_win(my_menu, my_menu_win);
@@ -55,11 +59,9 @@ void doMenu()
         {
             case KEY_DOWN:
                 menu_driver(my_menu, REQ_DOWN_ITEM);
-                update_description(description_win, item_description(current_item(my_menu)));
                 break;
             case KEY_UP:
                 menu_driver(my_menu, REQ_UP_ITEM);
-                update_description(description_win, item_description(current_item(my_menu)));
                 break;
             case 10: // Enter key
                 cur = current_item(my_menu);
@@ -73,19 +75,6 @@ void doMenu()
     return;
 }
 
-void update_description(WINDOW *description_win, const char *description)
-{
-    // Clear the description window
-    werase(description_win);
-    box(description_win, 0, 0);
-
-    // // Get the description of the current item
-    // const char *desc = item_description(current_item(my_menu));
-
-    // Print the description in the window
-    mvwprintw(description_win, 1, 1, "%s", description);
-    wrefresh(description_win);
-}
 
 void destroyMenu(ITEM **menuItemsList, MENU *my_menu)
 {
@@ -96,16 +85,32 @@ void destroyMenu(ITEM **menuItemsList, MENU *my_menu)
     free(menuItemsList);
 }
 
-ITEM **generateMenu()
+struct menuDetails generateMenu()
 {
 
     ITEM **menuItemsList;
     int choiceCount = ARRAY_SIZE(choices);
     menuItemsList = (ITEM **)calloc(choiceCount, sizeof(ITEM *));
     // populate the menu items end
-    for (int i = 0; i < choiceCount; ++i)
+    int menuWidth=40;
+    int i = 0;
+    for (; i < choiceCount; ++i)
     {
+        long nameLen=strlen(choices[i].name) ;
+        long descrLen=strlen(choices[i].description);
+        menuWidth=calcMenuWidth(nameLen,descrLen,menuWidth);
         menuItemsList[i] = new_item(choices[i].name, choices[i].description);
+        
     }
-    return menuItemsList;
+    
+    struct menuDetails _menuDetails= { .itemListPtr=menuItemsList , 
+        .windowWidth=menuWidth,
+        .menuItemCount=i+1};
+    return _menuDetails;
+}
+
+int calcMenuWidth(int nameLen,int descrLen,int max)
+{
+    int menuItemLeng=(long) nameLen>descrLen ? nameLen: descrLen;
+    return max > menuItemLeng? max: menuItemLeng+2; // add two for padding
 }

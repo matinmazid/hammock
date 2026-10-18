@@ -33,5 +33,5 @@ enum WINDOWS
 	RIGHT
 };
 
-struct guiWindow windows[3];
+extern struct guiWindow windows[3];
 #endif

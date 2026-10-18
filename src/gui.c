@@ -19,7 +19,7 @@
 
 extern void doMenu();
 
-extern struct guiWindow windows[3];
+struct guiWindow windows[3];
 
 static int activeWindowPtr = 0;
 static int restMethod_ptr = 0;
@@ -239,7 +239,7 @@ int main()
 
 	init_file(); // initialize the log file
 	// create a valid pointer
-	windows[RIGHT].content = calloc(0, sizeof(char));
+	windows[RIGHT].content = calloc(1, sizeof(char));
 	windows[RIGHT].scrollOffset = 0;
 	
 	windows[LEFT].content = calloc(2, sizeof(char));
