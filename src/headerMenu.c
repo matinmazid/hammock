@@ -40,8 +40,8 @@ void doMenu()
     WINDOW *my_menu_win;
 
     menuItemsList = generateMenu();
-    my_menu = new_menu(menuItemsList.itemListPtr);
 
+    my_menu = new_menu(menuItemsList.itemListPtr);
 
     my_menu_win = newwin(menuItemsList.menuItemCount, menuItemsList.windowWidth, 2, 2);
     keypad(my_menu_win, TRUE);
@@ -90,7 +90,7 @@ struct menuDetails generateMenu()
 
     ITEM **menuItemsList;
     int choiceCount = ARRAY_SIZE(choices);
-    menuItemsList = (ITEM **)calloc(choiceCount, sizeof(ITEM *));
+    menuItemsList = (ITEM **)calloc(choiceCount+1, sizeof(ITEM *));
     // populate the menu items end
     int menuWidth=40;
     int i = 0;
@@ -102,7 +102,8 @@ struct menuDetails generateMenu()
         menuItemsList[i] = new_item(choices[i].name, choices[i].description);
         
     }
-    
+    menuItemsList[i] = (ITEM *)NULL; // last item is NULL
+
     struct menuDetails _menuDetails= { .itemListPtr=menuItemsList , 
         .windowWidth=menuWidth,
         .menuItemCount=i+1};
