@@ -3,8 +3,8 @@ SANITIZER_FLAGS := -fsanitize=address,undefined -fno-omit-frame-pointer
 SRCDIR := src/
 OBJECTS := objects
 BIN := bin
-CPPFLAGS := $(shell pkg-config --cflags libcurl)
-LDFLAGS := $(shell pkg-config --libs libcurl)
+CPPFLAGS := $(shell pkg-config --cflags libcurl jansson ncurses)
+LDFLAGS := $(shell pkg-config --libs libcurl jansson ncurses)
 CC:=$(shell brew --prefix llvm)/bin/clang
 
 ifeq ($(SANITIZE),1)
@@ -47,5 +47,7 @@ headerMenu.o: $(SRCDIR)headerMenu.c
 log.o: $(SRCDIR)log.c $(SRCDIR)log.h
 	$(CC) $(CFLAGS) -c  $(SRCDIR)log.c -o $(OBJECTS)/log.o
 
+# fileHandler.o: $(SRCDIR)fileHandler.c $(SRCDIR)fileHandler.h
+# 	$(CC) $(CFLAGS) -c  $(SRCDIR)fileHandler.c -o $(OBJECTS)/fileHandler.o
 clean:
 	rm -rf $(BIN)/* $(OBJECTS)/*
