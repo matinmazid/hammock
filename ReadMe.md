@@ -45,6 +45,11 @@ When `LEFT` or `RIGHT` is active, arrow keys scroll the content if needed.
 
 
 ## Build and run
+0. Prequisites
+Build tools: 
+- autoconf
+- automake
+- libtool
 
 
 1. install curl dev library with headers
@@ -58,6 +63,10 @@ apt-get install libcurl4-openssl-dev
 ```sh
 apt-get install libncurses5-dev libncursesw5-dev
 ```
+3. install jansson
+https://jansson.readthedocs.io/en/latest/gettingstarted.html#compiling-and-installing-jansson
+required version of 2.15.1
+
 
 ### Compile
 
@@ -83,41 +92,9 @@ The event loop in `src/gui.c`:
 - handles window resize events
 - supports navigation, scrolling, and REST execution
 - exits cleanly on `Ctrl+Q`
+
 ## Licenses
 
-MIT License (Modified)
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
 
-Copyright (c) [2023] [Matin Mazid]
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions.
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-You try to be a good person.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-## Additional licences
-
-NCURSES Licence
-https://en.wikipedia.org/wiki/Ncurses
-Text and history of the ncurses library are found here:
-https://invisible-island.net/ncurses/ncurses-license.html
-
-libCurl Licence
-https://invisible-island.net/ncurses/ncurses-license.html
-
-log.c
-https://github.com/rxi/log.c.git
+Third-party software and license information are listed in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

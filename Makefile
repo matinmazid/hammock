@@ -3,23 +3,24 @@ SANITIZER_FLAGS := -fsanitize=address,undefined -fno-omit-frame-pointer
 SRCDIR := src/
 OBJECTS := objects
 BIN := bin
-CPPFLAGS := $(shell pkg-config --cflags libcurl jansson ncurses)
-LDFLAGS := $(shell pkg-config --libs libcurl jansson ncurses)
+CPPFLAGS := $(shell pkg-config --cflags libcurl ncurses jansson) -I/usr/local/opt/llvm/include
+LDLIBS := $(shell pkg-config --libs libcurl ncurses jansson) -lmenu
 CC:=$(shell brew --prefix llvm)/bin/clang
 
 ifeq ($(SANITIZE),1)
 	CFLAGS += $(SANITIZER_FLAGS)
 endif
 
-hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o headerMenu.o log.o
+hammock: $(SRCDIR)gui.c  webClient.o webClientCommon.o headerMenu.o log.o fileHandler.o
 	@mkdir -p $(OBJECTS)
 	@mkdir -p $(BIN)
-	$(CC) $(CFLAGS) -g $(SRCDIR)gui.c  -o $(BIN)/hammock \
+	$(CC) $(CFLAGS) $(CPPFLAGS) -g $(SRCDIR)gui.c  -o $(BIN)/hammock \
 	 $(OBJECTS)/headerMenu.o \
-	 -lmenu -lncurses $(OBJECTS)/webClient.o \
+	 $(OBJECTS)/webClient.o \
 	 $(OBJECTS)/webClientCommon.o  \
 	 $(OBJECTS)/log.o \
-	 -lcurl 
+	 $(OBJECTS)/fileHandler.o \
+	 $(LDLIBS)
 	chmod u+x $(BIN)/hammock
 
 scratch: src/scratch.c  webClient.o webClientCommon.o headerMenu.o log.o
@@ -27,10 +28,10 @@ scratch: src/scratch.c  webClient.o webClientCommon.o headerMenu.o log.o
 	@mkdir -p $(BIN)
 	$(CC) $(CFLAGS)  -g $(SRCDIR)scratch.c -o $(BIN)/scratch \
 	 $(OBJECTS)/headerMenu.o \
-	 -lmenu -lncurses $(OBJECTS)/webClient.o \
+	 $(OBJECTS)/webClient.o \
 	 $(OBJECTS)/webClientCommon.o  \
-	 -lcurl \
-	 $(OBJECTS)/log.o
+	 $(OBJECTS)/log.o \
+	 $(LDLIBS)
 	chmod u+x $(BIN)/scratch
 
 
@@ -47,7 +48,8 @@ headerMenu.o: $(SRCDIR)headerMenu.c
 log.o: $(SRCDIR)log.c $(SRCDIR)log.h
 	$(CC) $(CFLAGS) -c  $(SRCDIR)log.c -o $(OBJECTS)/log.o
 
-# fileHandler.o: $(SRCDIR)fileHandler.c $(SRCDIR)fileHandler.h
-# 	$(CC) $(CFLAGS) -c  $(SRCDIR)fileHandler.c -o $(OBJECTS)/fileHandler.o
+fileHandler.o: $(SRCDIR)fileHandler.c $(SRCDIR)fileHandler.h
+	$(CC) $(CFLAGS) $(CPPFLAGS) -c  $(SRCDIR)fileHandler.c -o $(OBJECTS)/fileHandler.o
+
 clean:
 	rm -rf $(BIN)/* $(OBJECTS)/*
