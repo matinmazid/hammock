@@ -41,17 +41,21 @@ WINDOW *drawWindow(int yStart, int xStart, int numLines, int numCols)
 
 int calculateRequiredPadHeight(char *content, int childWidth)
 {
-	int lengthOfContent=0;
-	int rowCount=0;
-	while (*content != '\0')	{
-		if (*content != '\n') {
+	int lengthOfContent = 0;
+	int rowCount = 0;
+	while (*content != '\0')
+	{
+		if (*content != '\n')
+		{
 			lengthOfContent++;
-			if (lengthOfContent >= childWidth) {
+			if (lengthOfContent >= childWidth)
+			{
 				rowCount++;
 				lengthOfContent = 0; // reset the length of content for the next row
 			}
 		}
-		else {
+		else
+		{
 			rowCount++;
 			lengthOfContent = 0; // reset the length of content for the next row
 		}
@@ -75,8 +79,8 @@ WINDOW *drawChildWindow(int parentPtr)
 	// caclucate the max width of a child window
 	int childWidth = windowsXsize - 2; // -2 for the border
 
-	//int lengthOfContent = strlen(parent.content);
-	int numberOfLines = calculateRequiredPadHeight(parent.content, childWidth)+1;
+	// int lengthOfContent = strlen(parent.content);
+	int numberOfLines = calculateRequiredPadHeight(parent.content, childWidth) + 1;
 	// int numberOfLines = lengthOfContent / childWidth + 3; // +1 for the last line
 	WINDOW *child = newpad(numberOfLines, childWidth);
 
@@ -131,7 +135,6 @@ void redrawAllWindows(void)
 			  windows[URL].content);
 	wnoutrefresh(windows[URL].boarderWindowRef);
 
-
 	if (ACTIVE_WINDOW == URL)
 	{
 		renderTextPadWindow(LEFT);
@@ -142,52 +145,50 @@ void redrawAllWindows(void)
 				  2 + strlen(methodNameList[restMethod_ptr % 5]));
 		wrefresh(windows[ACTIVE_WINDOW].boarderWindowRef);
 	}
-	else{
+	else
+	{
 
 		renderTextPadWindow(LEFT);
 		renderTextPadWindow(RIGHT);
 		renderTextPadWindow(ACTIVE_WINDOW);
 	}
 
-
 	doupdate(); // refresh the screen with the new windows
 	return;
 }
 
 // render the text and place the cursor at the end of the text
-void renderTextPadWindow(int aWindowPtr){
+void renderTextPadWindow(int aWindowPtr)
+{
 
-		int windowBeginYPos = 0, windowBeginXPos = 0, windowsXsize = 0, windowsYsize = 0;
-		getbegyx(windows[aWindowPtr].boarderWindowRef, windowBeginYPos, windowBeginXPos);
-		getmaxyx(windows[aWindowPtr].boarderWindowRef, windowsYsize, windowsXsize);
+	int windowBeginYPos = 0, windowBeginXPos = 0, windowsXsize = 0, windowsYsize = 0;
+	getbegyx(windows[aWindowPtr].boarderWindowRef, windowBeginYPos, windowBeginXPos);
+	getmaxyx(windows[aWindowPtr].boarderWindowRef, windowsYsize, windowsXsize);
 
-		if (windows[aWindowPtr].padTextTotalLines > windowsYsize)
-		{
-			wmove(windows[aWindowPtr].textWindowRef,
-				  windowsYsize - 3+windows[aWindowPtr].scrollOffset,
-				  0);
+	if (windows[aWindowPtr].padTextTotalLines > windowsYsize)
+	{
+		wmove(windows[aWindowPtr].textWindowRef,
+			  windowsYsize - 3 + windows[aWindowPtr].scrollOffset,
+			  0);
 
-			prefresh(windows[aWindowPtr].textWindowRef, 
-				windows[aWindowPtr].scrollOffset, 0,			// start of pad
-					windowBeginYPos + 1, windowBeginXPos + 1,	// start of screen
-					windowBeginYPos + windowsYsize - 2, 
-					windowBeginXPos + windowsXsize - 1); 		// end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
+		prefresh(windows[aWindowPtr].textWindowRef,
+				 windows[aWindowPtr].scrollOffset, 0,	   // start of pad
+				 windowBeginYPos + 1, windowBeginXPos + 1, // start of screen
+				 windowBeginYPos + windowsYsize - 2,
+				 windowBeginXPos + windowsXsize - 1); // end of screen (we want to display the whole pad, so we set the end of the screen to the end of the pad)
+	}
+	else
+	{
+		wmove(windows[aWindowPtr].textWindowRef,
+			  windows[aWindowPtr].padTextRows,
+			  windows[aWindowPtr].padTextCols);
 
-		}
-		else
-		{
-			wmove(windows[aWindowPtr].textWindowRef,
-				  windows[aWindowPtr].padTextRows,
-				  windows[aWindowPtr].padTextCols);
-			
-			prefresh(windows[aWindowPtr].textWindowRef, 
-				0, 0,
-				windowBeginYPos + 1, windowBeginXPos + 1,	// start of screen
-				windows[aWindowPtr].padTextRows,
-				windowBeginXPos + windowsXsize - 1);
-			
-		}
-
+		prefresh(windows[aWindowPtr].textWindowRef,
+				 0, 0,
+				 windowBeginYPos + 1, windowBeginXPos + 1, // start of screen
+				 windows[aWindowPtr].padTextRows,
+				 windowBeginXPos + windowsXsize - 1);
+	}
 }
 
 void appendChar(int newChar, int activeWindowPtr)
@@ -241,7 +242,7 @@ int main()
 	// create a valid pointer
 	windows[RIGHT].content = calloc(1, sizeof(char));
 	windows[RIGHT].scrollOffset = 0;
-	
+
 	windows[LEFT].content = calloc(2, sizeof(char));
 	windows[LEFT].scrollOffset = 0;
 
@@ -256,13 +257,13 @@ int main()
 
 	// int activeWindowPtr = 0;
 	// int restMethod_ptr = 0;
-	// zero out 
-	char * fileName=calloc(255,sizeof *fileName);
-	if (fileName==NULL)
+	// zero out
+	char *fileName = calloc(255, sizeof *fileName);
+	if (fileName == NULL)
 	{
 		log_error("failed to allocate memory to remember save file");
 	}
-	memcpy(fileName,"./hammock_request.json",strlen("./hammock_request.json"));
+	memcpy(fileName, "./hammock_request.json", strlen("./hammock_request.json"));
 	// start us  off by printting out a GET instructions
 	mvwprintw(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 1, "%s", windows[ACTIVE_WINDOW].content);
 
@@ -295,20 +296,18 @@ int main()
 			memset(windows[ACTIVE_WINDOW].content, '\0', strlen(windows[ACTIVE_WINDOW].content));
 			redrawAllWindows();
 		}
-		else if (ch == ESC )
+		else if (ch == ESC)
 		{ //  ESC key for menu
 			log_debug("menu called");
-			int menuChoice=doMenu();
+			int menuChoice = doMenu();
 			// post_menu(headerMenu);
-			switch(menuChoice)
+			switch (menuChoice)
 			{
-				case ACTION_SAVE_FILE :
-					drawGetFileNameWindow(fileName);
-					break;
-				default:
-					break;
-
-
+			case ACTION_SAVE_FILE:
+				drawGetFileNameWindow(fileName);
+				break;
+			default:
+				break;
 			}
 			box(windows[LEFT].boarderWindowRef, 0, 0);
 			box(windows[RIGHT].boarderWindowRef, 0, 0);
@@ -330,18 +329,19 @@ int main()
 			else
 				restMethod_ptr--; // this will cycle through 0-4
 		}
-		else if (ch == KEY_UP &&  
-			(ACTIVE_WINDOW == RIGHT || ACTIVE_WINDOW == LEFT))
+		else if (ch == KEY_UP &&
+				 (ACTIVE_WINDOW == RIGHT || ACTIVE_WINDOW == LEFT))
 		{
-			if (windows[ACTIVE_WINDOW].scrollOffset <= 0) {
+			if (windows[ACTIVE_WINDOW].scrollOffset <= 0)
+			{
 				continue; // we are already at the top of the window, so we can't scroll up anymore
 			}
 
 			windows[ACTIVE_WINDOW].scrollOffset -= 1;
 			continue;
 		}
-		else if (ch == KEY_DOWN && 
-			(ACTIVE_WINDOW == RIGHT || ACTIVE_WINDOW == LEFT))
+		else if (ch == KEY_DOWN &&
+				 (ACTIVE_WINDOW == RIGHT || ACTIVE_WINDOW == LEFT))
 		{
 			// scroll down the right window
 			windows[ACTIVE_WINDOW].scrollOffset += 1;
@@ -382,33 +382,34 @@ int main()
 		}
 	}
 
-	endwin(); /* End curses mode		  */
+	endwin();		  /* End curses mode		  */
 	close_log_file(); // close the log file
 	return 0;
 }
 
-void drawGetFileNameWindow(char * fileName){
-	WINDOW * filePathWindow=drawWindow(4,0, 3, COLS-1);
-	int ch=-1;
-	int fileNameLength=strlen(fileName);
+void drawGetFileNameWindow(char *fileName)
+{
+	WINDOW *filePathWindow = drawWindow(4, 0, 3, COLS - 1);
+	int ch = -1;
+	int fileNameLength = strlen(fileName);
 
-	do {
-		mvwprintw(filePathWindow,1,fileNameLength+1,"%s",fileName);
+	do
+	{
+		mvwprintw(filePathWindow, 1, fileNameLength + 1, "%s", fileName);
 		wrefresh(filePathWindow);
 
-		if(ch==KEY_BACKSPACE || ch==8||ch==127||ch==KEY_DC)
+		if (ch == KEY_BACKSPACE || ch == 8 || ch == 127 || ch == KEY_DC)
 		{
-			if(fileNameLength>0)
+			if (fileNameLength > 0)
 			{
-				fileName[--fileNameLength]='\0';
+				fileName[--fileNameLength] = '\0';
 			}
 		}
-		else if (ch>=32 && ch<126 && fileNameLength<254)
+		else if (ch >= 32 && ch < 126 && fileNameLength < 254)
 		{
-			fileName[fileNameLength++]=(char)ch;
-			fileName[fileNameLength]='\0';
+			fileName[fileNameLength++] = (char)ch;
+			fileName[fileNameLength] = '\0';
 		}
 
-	}while((ch=wgetch(filePathWindow)) !='\n' && ch!=KEY_ENTER);
-
+	} while ((ch = wgetch(filePathWindow)) != '\n' && ch != KEY_ENTER);
 }
