@@ -6,6 +6,7 @@
 #include "log.h"
 #include "gui.h"
 #include "string.h"
+#include "headerMenu.h"
 
 struct menuDetails {
     ITEM** itemListPtr;
@@ -13,27 +14,22 @@ struct menuDetails {
     int menuItemCount;
 };
 
-struct choice {
-    char *name;
-    char *description;
-
-};
 
 struct choice choices[] = {
-    {"request header", "update request header"},
-    {"save file", "save request and response to a file"},
-    {"exit menu", "exit menu"},
-    {"quit all", "quit the program"}
+    {"request header", "update request header",ACTION_REQUEST_HEADER},
+    {"save file", "save request and response to a file",ACTION_SAVE_FILE},
+    {"exit menu", "exit menu",ACTION_EXIT_MENU},
+    {"quit all", "quit the program",ACTION_QUIT}
     };
 
-extern void doMenu();
+int doMenu();
 struct menuDetails generateMenu();
 void destroyMenu(ITEM**menuItemsList, MENU *my_menu);
 int calcMenuWidth(int, int, int);
 MENU *my_menu;
 extern char *ContentTypes[];
 
-void doMenu()
+int doMenu()
 {
 
     struct menuDetails menuItemsList;
@@ -52,6 +48,7 @@ void doMenu()
     wrefresh(my_menu_win);
 
     int c;
+    int chosenOption=-1; 
     while ((c = wgetch(my_menu_win)) != ESC)
     {
         ITEM *cur;
@@ -65,14 +62,16 @@ void doMenu()
                 break;
             case 10: // Enter key
                 cur = current_item(my_menu);
-                log_debug("Menu item selected: %s", item_name(cur));
-                break;
+                chosenOption=*(int*) item_userptr(cur);
+                log_debug("Menu item selected: %s %d", item_name(cur), chosenOption);
+                delwin(my_menu_win);
+                return chosenOption;
         }
         wrefresh(my_menu_win);
     } // end while
 
     delwin(my_menu_win);
-    return;
+    return chosenOption;
 }
 
 
@@ -100,8 +99,11 @@ struct menuDetails generateMenu()
         long descrLen=strlen(choices[i].description);
         menuWidth=calcMenuWidth(nameLen,descrLen,menuWidth);
         menuItemsList[i] = new_item(choices[i].name, choices[i].description);
+        log_debug("item %s %d ",choices[i].description,choices[i].choiceIndex);
+        set_item_userptr(menuItemsList[i],&choices[i].choiceIndex);
         
     }
+
     menuItemsList[i] = (ITEM *)NULL; // last item is NULL
 
     struct menuDetails _menuDetails= { .itemListPtr=menuItemsList , 

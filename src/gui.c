@@ -1,7 +1,6 @@
 #include <stdlib.h>
 // #include <strings.h>
 #include <string.h>
-
 #ifndef __HAMMOCK_GUI_H
 #include "gui.h"
 #endif
@@ -15,16 +14,19 @@
 #include <curses.h>
 #include <stdio.h>
 #include "log.h"
+#include "headerMenu.h"
 #define ACTIVE_WINDOW (activeWindowPtr % 3)
 
-extern void doMenu();
+extern int doMenu();
 
 struct guiWindow windows[3];
 
+static char *fileName ="./hammock_request.json";
 static int activeWindowPtr = 0;
 static int restMethod_ptr = 0;
 void destroy_win(WINDOW *local_win);
 void renderTextPadWindow(int aWindowPtr);
+void drawGetFileNameWindow();
 
 /**************** FUNCTIONS *****************/
 
@@ -199,7 +201,6 @@ void appendChar(int newChar, int activeWindowPtr)
 	// we are adding wasting 5 bytes here to make sure we dont buffer overrun
 	// I'll fix it later
 	char *newStr = calloc(newStrLen + 5, sizeof(char));
-	memset(newStr, '\0', newStrLen + 4); // clear the memory
 	windows[ACTIVE_WINDOW].content = memcpy(newStr, oldPtr, newStrLen);
 	windows[ACTIVE_WINDOW].content[newStrLen] = (char)newChar;
 	free(oldPtr); // free the old pointer
@@ -256,6 +257,12 @@ int main()
 
 	// int activeWindowPtr = 0;
 	// int restMethod_ptr = 0;
+	// zero out 
+	fileName=calloc(255,sizeof *fileName);
+	if (fileName==NULL)
+	{
+		log_error("failed to allocate memory to remember save file");
+	}
 	// start us  off by printting out a GET instructions
 	mvwprintw(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 1, "%s", windows[ACTIVE_WINDOW].content);
 
@@ -291,8 +298,18 @@ int main()
 		else if (ch == ESC )
 		{ //  ESC key for menu
 			log_debug("menu called");
-			doMenu();
+			int menuChoice=doMenu();
 			// post_menu(headerMenu);
+			switch(menuChoice)
+			{
+				case ACTION_SAVE_FILE :
+					drawGetFileNameWindow();
+					break;
+				default:
+					break;
+
+
+			}
 			box(windows[LEFT].boarderWindowRef, 0, 0);
 			box(windows[RIGHT].boarderWindowRef, 0, 0);
 			wrefresh(windows[LEFT].boarderWindowRef);
@@ -368,4 +385,29 @@ int main()
 	endwin(); /* End curses mode		  */
 	close_log_file(); // close the log file
 	return 0;
+}
+
+void drawGetFileNameWindow(){
+	WINDOW * filePathWindow=drawWindow(4,0, 3, COLS-1);
+	int ch=-1;
+	int fileNameLength=strlen(fileName);
+	while((ch=wgetch(filePathWindow)) !='\n' && ch!=KEY_ENTER)
+	{
+		if(ch==KEY_BACKSPACE || ch==8||ch==127||ch==KEY_DC)
+		{
+			if(fileNameLength>0)
+			{
+				fileName[--fileNameLength]='\0';
+			}
+		}
+		else if (ch>=32 && ch<126 && fileNameLength<254)
+		{
+			fileName[fileNameLength++]=(char)ch;
+			fileName[fileNameLength]='\0';
+		}
+
+		mvwprintw(filePathWindow,1,1,"%s",fileName);
+		wmove(filePathWindow,1,fileNameLength);
+		wrefresh(filePathWindow);
+	}
 }
