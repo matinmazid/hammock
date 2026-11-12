@@ -21,7 +21,6 @@ extern int doMenu();
 
 struct guiWindow windows[3];
 
-static char *fileName ="./hammock_request.json";
 static int activeWindowPtr = 0;
 static int restMethod_ptr = 0;
 void destroy_win(WINDOW *local_win);
@@ -258,11 +257,12 @@ int main()
 	// int activeWindowPtr = 0;
 	// int restMethod_ptr = 0;
 	// zero out 
-	fileName=calloc(255,sizeof *fileName);
+	char * fileName=calloc(255,sizeof *fileName);
 	if (fileName==NULL)
 	{
 		log_error("failed to allocate memory to remember save file");
 	}
+	memcpy(fileName,"./hammock_request.json",strlen("./hammock_request.json"));
 	// start us  off by printting out a GET instructions
 	mvwprintw(windows[ACTIVE_WINDOW].boarderWindowRef, 1, 1, "%s", windows[ACTIVE_WINDOW].content);
 
@@ -303,7 +303,7 @@ int main()
 			switch(menuChoice)
 			{
 				case ACTION_SAVE_FILE :
-					drawGetFileNameWindow();
+					drawGetFileNameWindow(fileName);
 					break;
 				default:
 					break;
@@ -387,12 +387,15 @@ int main()
 	return 0;
 }
 
-void drawGetFileNameWindow(){
+void drawGetFileNameWindow(char * fileName){
 	WINDOW * filePathWindow=drawWindow(4,0, 3, COLS-1);
 	int ch=-1;
 	int fileNameLength=strlen(fileName);
-	while((ch=wgetch(filePathWindow)) !='\n' && ch!=KEY_ENTER)
-	{
+
+	do {
+		mvwprintw(filePathWindow,1,fileNameLength+1,"%s",fileName);
+		wrefresh(filePathWindow);
+
 		if(ch==KEY_BACKSPACE || ch==8||ch==127||ch==KEY_DC)
 		{
 			if(fileNameLength>0)
@@ -406,8 +409,6 @@ void drawGetFileNameWindow(){
 			fileName[fileNameLength]='\0';
 		}
 
-		mvwprintw(filePathWindow,1,1,"%s",fileName);
-		wmove(filePathWindow,1,fileNameLength);
-		wrefresh(filePathWindow);
-	}
+	}while((ch=wgetch(filePathWindow)) !='\n' && ch!=KEY_ENTER);
+
 }
