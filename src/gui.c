@@ -25,7 +25,7 @@ static int activeWindowPtr = 0;
 static int restMethod_ptr = 0;
 void destroy_win(WINDOW *local_win);
 void renderTextPadWindow(int aWindowPtr);
-void drawGetFileNameWindow();
+void drawGetFileNameWindow(char * fileName);
 
 /**************** FUNCTIONS *****************/
 
@@ -259,6 +259,7 @@ int main()
 	// int restMethod_ptr = 0;
 	// zero out
 	char *fileName = calloc(255, sizeof *fileName);
+
 	if (fileName == NULL)
 	{
 		log_error("failed to allocate memory to remember save file");
@@ -389,14 +390,18 @@ int main()
 
 void drawGetFileNameWindow(char *fileName)
 {
-	WINDOW *filePathWindow = drawWindow(4, 0, 3, COLS - 1);
+	WINDOW *filePathWindow =NULL;
 	int ch = -1;
-	int fileNameLength = strlen(fileName);
-
-	do
+	while ((ch = wgetch(filePathWindow)) 
+		!= '\n' 
+		&& ch != KEY_ENTER
+		&& ch != ESC
+	)
 	{
-		mvwprintw(filePathWindow, 1, fileNameLength + 1, "%s", fileName);
-		wrefresh(filePathWindow);
+		if (filePathWindow !=NULL)
+			werase(filePathWindow);
+
+		int fileNameLength = strlen(fileName);
 
 		if (ch == KEY_BACKSPACE || ch == 8 || ch == 127 || ch == KEY_DC)
 		{
@@ -407,9 +412,21 @@ void drawGetFileNameWindow(char *fileName)
 		}
 		else if (ch >= 32 && ch < 126 && fileNameLength < 254)
 		{
+			if (fileNameLength >=254)
+			{
+				char * tmp=calloc(fileNameLength+2,sizeof *tmp);
+				strcpy(tmp,fileName);
+				fileName=tmp;
+
+			}
+
 			fileName[fileNameLength++] = (char)ch;
 			fileName[fileNameLength] = '\0';
 		}
 
-	} while ((ch = wgetch(filePathWindow)) != '\n' && ch != KEY_ENTER);
+		filePathWindow= drawWindow(4, 0, 3, COLS - 1);
+		mvwprintw(filePathWindow, 1, 1, "%s", fileName);
+		wmove(filePathWindow,1,fileNameLength+1);
+		wrefresh(filePathWindow);
+	}
 }
