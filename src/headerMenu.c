@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <curses.h>
 #include <ncurses.h>
-#define ARRAY_SIZE(a) (sizeof(a) / sizeof(a[0]))
+#include "util.h"
 #include "log.h"
 #include "gui.h"
 #include "string.h"
