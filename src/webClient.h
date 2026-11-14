@@ -8,10 +8,7 @@
 #include "webClientCommon.h"
 #endif
 
-// TODO fix this so _means hidden
-// TODo create a typedef for RestRequest
 typedef struct RestResponse _RestResponse;
-extern char *methodNameList[];
 extern char *ContentTypes[];
 extern _RestResponse executeRest(char * url, int handlerIndex,char ** , char *);
 

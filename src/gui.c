@@ -18,7 +18,7 @@
 #define ACTIVE_WINDOW (activeWindowPtr % 3)
 
 extern int doMenu();
-
+extern char *methodNameList[] ;
 struct guiWindow windows[3];
 
 static int activeWindowPtr = 0;
@@ -301,11 +301,12 @@ int main()
 		{ //  ESC key for menu
 			log_debug("menu called");
 			int menuChoice = doMenu();
-			// post_menu(headerMenu);
+			
 			switch (menuChoice)
 			{
 			case ACTION_SAVE_FILE:
 				drawGetFileNameWindow(fileName);
+				// saveFile(windows[RIGHT].content,windows[LEFT].content, fileName);
 				break;
 			default:
 				break;

@@ -18,7 +18,7 @@ extern struct RestResponse doDelete(char *url, char **header, char *);
 extern struct RestResponse doPatch(char *url, char **header, char *);
 extern struct RestResponse doPut(char *url, char **header, char *);
 extern char *webclient_statusCodeStr(enum STATUS_CODES statusCode);
-
+extern char *methodNameList[];
 char *methodNameList[] = {"GET", "PUT", "POST", "DELETE", "PATCH"};
 methodPtr methodList[] = {&doGet, &doPut, &doPost, &doDelete, &doPatch};
 
