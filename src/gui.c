@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <curses.h>
 #include <stdio.h>
-#include "log.h"
+#include "util.h"
 #include "headerMenu.h"
 #define ACTIVE_WINDOW (activeWindowPtr % 3)
 

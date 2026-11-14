@@ -3,7 +3,6 @@
 #include <curses.h>
 #include <ncurses.h>
 #include "util.h"
-#include "log.h"
 #include "gui.h"
 #include "string.h"
 #include "headerMenu.h"
